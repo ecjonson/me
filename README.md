@@ -1,2 +1,1 @@
-# me
-evanjonson.com - portfolio project
+# Evan Jonson's Portfolio
