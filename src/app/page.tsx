@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function Home() {
     return (
         <main className="mx-auto max-w-2xl px-6 py-24">
@@ -40,7 +42,7 @@ export default function Home() {
             <section>
                 <h2 className="mb-4 text-xl font-semibold">Contact</h2>
                 <div className="flex gap-4 text-sm">
-                    <a href="mailto:evancjonson@gmail.com" className="text-blue-600 hover:underline dark:text-blue-400">
+                    <a href="mailto:evancjonson@gmail.com" className="text-blue-600 hover:underline dark:text-blue-400" target="_blank">
                         Email
                     </a>
                     <a href="https://www.linkedin.com/in/evan-jonson/" className="text-blue-600 hover:underline dark:text-blue-400" target="_blank">
@@ -49,6 +51,9 @@ export default function Home() {
                     <a href="https://github.com/ecjonson" className="text-blue-600 hover:underline dark:text-blue-400" target="_blank">
                         GitHub
                     </a>
+                    <Link href="/resume" className="text-blue-600 hover:underline dark:text-blue-400" target="_blank">
+                        Resume
+                    </Link>
                 </div>
             </section>
         </main>
