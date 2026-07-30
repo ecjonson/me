@@ -1,8 +1,14 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
     --background: #ffffff;
     --foreground: #171717;
+}
+
+.dark {
+    --background: #0a0a0a;
+    --foreground: #ededed;
 }
 
 @theme inline {
@@ -10,15 +16,73 @@
     --color-foreground: var(--foreground);
 }
 
-@media (prefers-color-scheme: dark) {
-    :root {
-        --background: #0a0a0a;
-        --foreground: #ededed;
-    }
-}
-
 body {
     background: var(--background);
     color: var(--foreground);
     font-family: Arial, Helvetica, sans-serif;
+}
+
+/* ================================================================= *
+ * View Transitions — carousel thumbnail → project hero choreography
+ * -----------------------------------------------------------------
+ * Requires `experimental.viewTransition: true` in next.config (see notes).
+ * Paste this block into app/globals.css.
+ *
+ * On navigating into a project the browser runs ONE transition timeline:
+ *   (1) 0ms    the image morphs up from the thumbnail into the framed hero
+ *   (2) ~460ms the hero copy fades + rises in
+ *   (3) ~720ms the section nav slides in (up on mobile, from the left on desktop)
+ * Adjust the delays/durations below to re-time the sequence.
+ * ================================================================= */
+
+/* (1) Shared image morph. `.morph` comes from share="morph" on both the
+   thumbnail (ProjectCarousel) and the hero image (ProjectView). */
+::view-transition-group(.morph) {
+    animation-duration: 500ms;
+    animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+}
+::view-transition-image-pair(.morph) {
+    animation-name: vt-morph-blur; /* softens interpolation while scaling */
+}
+@keyframes vt-morph-blur {
+    40% { filter: blur(2px); }
+}
+
+/* (2) Hero copy — enters after the image has settled. */
+::view-transition-new(.hero-copy-in) {
+    animation: 360ms ease-out 460ms both vt-copy-in;
+}
+@keyframes vt-copy-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* (3) Section nav — enters last.
+   Default (mobile): slides up from the bottom bar.
+   lg and up: slides in from the left rail. */
+::view-transition-new(.section-nav-in) {
+    animation: 420ms cubic-bezier(0.33, 1, 0.68, 1) 720ms both vt-nav-in-up;
+}
+@keyframes vt-nav-in-up {
+    from { opacity: 0; transform: translateY(100%); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+@media (min-width: 1024px) {
+    ::view-transition-new(.section-nav-in) {
+        animation-name: vt-nav-in-left;
+    }
+}
+@keyframes vt-nav-in-left {
+    from { opacity: 0; transform: translateX(-100%); }
+    to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Reduced motion: skip movement, let content swap instantly. */
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-group(*),
+    ::view-transition-old(*),
+    ::view-transition-new(*) {
+        animation-duration: 0s !important;
+        animation-delay: 0s !important;
+    }
 }

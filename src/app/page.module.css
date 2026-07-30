@@ -1,0 +1,19 @@
+.cursor {
+    display: inline-block;
+    width: 0.06em;
+    height: 0.95em;
+    color: #bd93f9;
+    margin-left: 0.08em;
+    vertical-align: text-bottom;
+    background-color: currentColor;
+    animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+    0%, 49% { opacity: 1; }
+    50%, 100% { opacity: 0; }
+}
+
+/* class-based, so it follows the toggle — not just the OS */
+:global(.dark) .cursor {
+    color: #50fa7b;
+}
