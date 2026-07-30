@@ -2,7 +2,9 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ViewTransition, useEffect, useRef, useState } from "react";
+import { projects } from "@/lib/projects";
 import type { Project, ProjectLink, ProjectSection } from "@/lib/projects";
 
 /**
@@ -90,6 +92,13 @@ export function ProjectView({ project }: { project: Project }) {
         ...project.sections.map((s) => ({ id: s.id, label: s.label })),
     ];
     const [active, setActive] = useState(items[0].id);
+
+    // Sibling projects for the end-of-nav hand-offs. Linear (no wrap): the first
+    // project has no previous and the last has no next, so each control only
+    // appears "when applicable". Driven off the objects directly so TS narrows them.
+    const projectIndex = projects.findIndex((p) => p.slug === project.slug);
+    const prevProject = projects[projectIndex - 1]; // undefined on the first project
+    const nextProject = projects[projectIndex + 1]; // undefined on the last project
 
     // Mobile nav: translate the label strip so the active tab sits at the left,
     // right next to the back button. No horizontal scrolling.
@@ -190,15 +199,39 @@ export function ProjectView({ project }: { project: Project }) {
          
     }, [project.slug]);
 
+    // Esc exits to the index, the way a modal closes — reinforces the popup feel.
+    // Mainly a desktop/keyboard nicety, but harmless everywhere. Routes to "/" (home),
+    // matching the back/× controls rather than browser history.
+    const router = useRouter();
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === "Escape" && !e.defaultPrevented) router.push("/");
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [router]);
+
     return (
         <div className="relative">
-            {/* Desktop back button — top-left, as a bubble matching the nav. */}
+            {/* Desktop back button — top-left, a labeled pill (arrow + text) since the
+                left rail leaves room for it. Mobile keeps the compact bubble below. */}
             <Link
                 href="/"
-                aria-label="Back"
-                className="fixed left-4 top-4 z-50 hidden h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-base text-gray-600 transition-colors hover:text-blue-600 lg:flex dark:bg-gray-800 dark:text-gray-300 dark:hover:text-blue-400"
+                className="fixed left-4 top-4 z-50 hidden items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-sm text-gray-600 transition-colors hover:text-blue-600 lg:flex dark:bg-gray-800 dark:text-gray-300 dark:hover:text-blue-400"
             >
-                ←
+                <span aria-hidden="true">←</span>
+                <span>Back</span>
+            </Link>
+
+            {/* Close (×) — mobile only, where the nav sits at the bottom and the page
+                reads as a popup. On desktop the left rail + top-left back cover this,
+                so a second dismiss control would just be noise. */}
+            <Link
+                href="/"
+                aria-label="Close"
+                className="fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-lg leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-blue-600 lg:hidden dark:bg-gray-800/90 dark:text-gray-300 dark:hover:text-blue-400"
+            >
+                ×
             </Link>
 
             {/* Section outline.
@@ -211,14 +244,44 @@ export function ProjectView({ project }: { project: Project }) {
                     aria-label="Sections"
                     className="fixed inset-x-0 bottom-0 z-40 flex h-14 touch-none items-center gap-1 overscroll-contain border-t border-gray-200/70 bg-white/80 px-2 backdrop-blur-sm lg:inset-x-auto lg:left-0 lg:top-0 lg:h-dvh lg:w-40 lg:flex-col lg:items-start lg:justify-center lg:gap-2 lg:border-t-0 lg:border-r lg:px-4 dark:border-gray-800/70 dark:bg-gray-950/60"
                 >
-                    {/* Mobile back button (bubble). Hidden on desktop — the top-left one shows there. */}
-                    <Link
-                        href="/"
-                        aria-label="Back"
-                        className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-base text-gray-600 transition-colors hover:text-blue-600 lg:hidden dark:bg-gray-800 dark:text-gray-300 dark:hover:text-blue-400"
-                    >
-                        ←
-                    </Link>
+                    {/* Previous project — desktop rail only, pinned at the top to mirror
+                        the "next" link at the bottom. The top-left home arrow stays, so
+                        the rail keeps both. On mobile, prev lives in the bubble below. */}
+                    {prevProject ? (
+                        <>
+                            <Link
+                                href={`/projects/${prevProject.slug}`}
+                                title={`Previous project: ${prevProject.name}`}
+                                className="hidden shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 lg:flex lg:w-full dark:text-blue-400 dark:hover:bg-blue-950/40"
+                            >
+                                <span aria-hidden="true">←</span>
+                                <span className="max-w-32 truncate lg:max-w-full">{prevProject.name}</span>
+                            </Link>
+                            <span aria-hidden="true" className="hidden bg-gray-200 lg:my-1 lg:block lg:h-px lg:w-full dark:bg-gray-800" />
+                        </>
+                    ) : null}
+
+                    {/* Bubble — mobile only. On the first project it's the home/back arrow.
+                        On every other project it becomes "previous project" (blue), since
+                        the top-right × already covers home there. */}
+                    {prevProject ? (
+                        <Link
+                            href={`/projects/${prevProject.slug}`}
+                            aria-label={`Previous project: ${prevProject.name}`}
+                            title={`Previous project: ${prevProject.name}`}
+                            className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-base text-blue-600 transition-colors hover:bg-blue-100 lg:hidden dark:bg-blue-950/50 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                            ←
+                        </Link>
+                    ) : (
+                        <Link
+                            href="/"
+                            aria-label="Back"
+                            className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-base text-gray-600 transition-colors hover:text-blue-600 lg:hidden dark:bg-gray-800 dark:text-gray-300 dark:hover:text-blue-400"
+                        >
+                            ←
+                        </Link>
+                    )}
 
                     {/* Clip window (mobile) → dissolves to plain rail items (desktop). */}
                     <div className="relative h-full flex-1 overflow-hidden lg:contents">
@@ -249,6 +312,26 @@ export function ProjectView({ project }: { project: Project }) {
                                     </a>
                                 );
                             })}
+
+                            {/* End-of-nav hand-off to the next project. A real route
+                                Link (not a section anchor), so it's click-only and never
+                                a scroll target — scrolling stays inside this project. */}
+                            {nextProject ? (
+                                <>
+                                    <span
+                                        aria-hidden="true"
+                                        className="mx-1 h-5 w-px shrink-0 self-center bg-gray-200 dark:bg-gray-800 lg:mx-0 lg:my-1 lg:h-px lg:w-full"
+                                    />
+                                    <Link
+                                        href={`/projects/${nextProject.slug}`}
+                                        title={`Next project: ${nextProject.name}`}
+                                        className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 lg:w-full dark:text-blue-400 dark:hover:bg-blue-950/40"
+                                    >
+                                        <span className="max-w-32 truncate lg:max-w-full">{nextProject.name}</span>
+                                        <span aria-hidden="true">→</span>
+                                    </Link>
+                                </>
+                            ) : null}
                         </div>
                     </div>
                 </nav>
