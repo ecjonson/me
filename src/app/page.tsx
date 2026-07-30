@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { FaEnvelope, FaLinkedinIn, FaGithub, FaFileLines, FaRotateLeft, FaChessKnight } from "react-icons/fa6";
+import { useEffect, useState, type MouseEvent } from "react";
+import { FaEnvelope, FaLinkedinIn, FaGithub, FaFileLines, FaRotateLeft, FaChessKnight, FaPaperPlane, FaEnvelopeCircleCheck } from "react-icons/fa6";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ProjectCarousel } from "@/components/ProjectCarousel";
 import styles from "./page.module.css";
@@ -30,6 +30,85 @@ const REVEAL_DELAY = 1000;
 
 function Cursor() {
     return <span aria-hidden="true" className={styles.cursor} />;
+}
+
+const linkCls = "inline-flex items-center gap-2 transition-colors hover:text-blue-600 dark:hover:text-blue-400";
+const EMAIL = "evancjonson@gmail.com";
+
+// Email is a two-step link with three looks:
+//   1. envelope + "Email"        → first click copies the address
+//   2. check + "Copied!"         → brief confirmation flash (~1.8s)
+//   3. paper plane + "Email"     → settled "primed" state; click opens the mail app
+// `primed` persists (so clicks always open mail after the first), while `flash`
+// only drives the temporary confirmation. Falls back to opening mail directly if
+// the clipboard API is unavailable or blocked.
+function EmailLink({ showLabel = false }: { showLabel?: boolean }) {
+    const [primed, setPrimed] = useState(false);
+    const [flash, setFlash] = useState(false);
+
+    useEffect(() => {
+        if (!flash) return;
+        const t = setTimeout(() => setFlash(false), 800);
+        return () => clearTimeout(t);
+    }, [flash]);
+
+    const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
+        if (primed) return; // already copied → let the mailto proceed
+        e.preventDefault();
+        const clipboard = navigator.clipboard;
+        if (clipboard?.writeText) {
+            clipboard.writeText(EMAIL).then(
+                () => {
+                    setPrimed(true);
+                    setFlash(true);
+                },
+                () => {
+                    window.location.href = `mailto:${EMAIL}`;
+                }
+            );
+        } else {
+            window.location.href = `mailto:${EMAIL}`;
+        }
+    };
+
+    const hint = flash
+        ? "Email copied — click to open your mail app"
+        : primed
+            ? "Open your mail app"
+            : "Copy email address";
+
+    return (
+        <a aria-label={hint} title={hint} href={`mailto:${EMAIL}`} onClick={onClick} className={linkCls}>
+            {flash ? <FaEnvelopeCircleCheck /> : primed ? <FaPaperPlane /> : <FaEnvelope />}
+            {showLabel && <span>{flash ? "Copied!" : primed ? "MailTo" : "Email"}</span>}
+        </a>
+    );
+}
+
+// Shared contact/profile links — icon-only in the mobile bottom bar, icon + label
+// in the desktop in-flow section (showLabels). Kept in one place so both stay in sync.
+function ContactLinks({ showLabels = false }: { showLabels?: boolean }) {
+    return (
+        <>
+            <a aria-label="LinkedIn" href="https://www.linkedin.com/in/evan-jonson/" target="_blank" rel="noopener noreferrer" className={linkCls}>
+                <FaLinkedinIn />
+                {showLabels && <span>LinkedIn</span>}
+            </a>
+            <a aria-label="GitHub" href="https://github.com/ecjonson" target="_blank" rel="noopener noreferrer" className={linkCls}>
+                <FaGithub />
+                {showLabels && <span>GitHub</span>}
+            </a>
+            <a aria-label="Chess" href="https://www.chess.com/member/ibahn" target="_blank" rel="noopener noreferrer" className={linkCls}>
+                <FaChessKnight />
+                {showLabels && <span>Chess</span>}
+            </a>
+            <Link aria-label="Resume" href="/resume" target="_blank" rel="noopener noreferrer" className={linkCls}>
+                <FaFileLines />
+                {showLabels && <span>Resume</span>}
+            </Link>
+            <EmailLink showLabel={showLabels} />
+        </>
+    );
 }
 
 function delayAfter(char: string) {
@@ -133,7 +212,7 @@ export default function Home() {
         : "";
 
     return (
-        <main className="mx-auto max-w-2xl px-6 sm:px-8 lg:max-w-5xl">
+        <main className="mx-auto flex min-h-dvh max-w-2xl flex-col px-6 sm:px-8 lg:max-w-5xl">
             {/* Greeting hero — stays on the page, then pans out to reveal the rest */}
             <section className="flex flex-col pt-16 pb-12 sm:pt-20 min-h-[40vh]">
                 <div
@@ -176,19 +255,34 @@ export default function Home() {
                     )}
                 </div>
             </section>
-            {/* The rest of the page, revealed as the hero pans out */}
+            {/* The rest of the page, revealed as the hero pans out. On mobile it floats
+                to the bottom (mt-auto) for breathing room under the greeting; on desktop
+                it sits right below the hero, with the links in-flow beneath the projects. */}
             <div
-                className={`pb-24 ${
+                className={`mt-auto pb-28 lg:mt-0 lg:pb-20 ${
                     started ? "transition-opacity delay-300 duration-700 ease-out" : ""
                 } ${revealed ? "opacity-100" : "opacity-0"}`}
             >
-                <section className="mb-16">
+                <section>
                     <ProjectCarousel />
                 </section>
+
+                {/* Links — desktop only, in-flow below the projects with a bit of context.
+                    Mobile shows the fixed bottom bar version instead. */}
+                <section className="mt-16 hidden lg:block">
+                    <h2 className="text-sm font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
+                        Get in touch
+                    </h2>
+                    <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-3 text-lg text-gray-600 dark:text-gray-400">
+                        <ContactLinks showLabels />
+                    </div>
+                </section>
             </div>
-            <nav
-                aria-label="Controls and contact"
-                className={`fixed inset-x-0 bottom-0 z-40 flex items-center justify-center gap-5 p-4 text-2xl text-gray-600 transition-opacity duration-700 dark:text-gray-400 lg:inset-x-auto lg:bottom-auto lg:right-0 lg:top-0 lg:justify-end lg:p-6 ${
+
+            {/* Utilities — theme + replay. Top-right on every viewport. The arbitrary
+                variant gives descendant buttons (incl. ThemeToggle) the link pointer. */}
+            <div
+                className={`fixed right-0 top-0 z-40 flex items-center gap-5 p-4 text-2xl text-gray-600 transition-opacity duration-700 [&_button]:cursor-pointer dark:text-gray-400 lg:p-6 ${
                     revealed ? "opacity-100" : "opacity-0 pointer-events-none"
                 }`}
             >
@@ -202,12 +296,22 @@ export default function Home() {
                 >
                     <FaRotateLeft />
                 </button>
+            </div>
+
+            {/* Contact links — mobile bottom bar. Frosted + top border to match the
+                project nav, with a "Get in touch" label and a hairline divider before
+                the icons. Desktop uses the in-flow section above (no separator there). */}
+            <nav
+                aria-label="Contact and links"
+                className={`fixed inset-x-0 bottom-0 z-40 flex items-center justify-center gap-3 border-t border-gray-200/70 bg-white/80 p-4 text-2xl text-gray-600 backdrop-blur-sm transition-opacity duration-700 dark:border-gray-800/70 dark:bg-gray-950/60 dark:text-gray-400 lg:hidden ${
+                    revealed ? "opacity-100" : "opacity-0 pointer-events-none"
+                }`}
+            >
+                <span className="whitespace-nowrap text-sm font-medium text-gray-500 dark:text-gray-400">Get in touch</span>
                 <span aria-hidden="true" className="h-6 w-px bg-gray-300 dark:bg-gray-700" />
-                <a aria-label="Email" href="mailto:evancjonson@gmail.com" className="transition-colors hover:text-blue-600 dark:hover:text-blue-400"><FaEnvelope /></a>
-                <a aria-label="LinkedIn" href="https://www.linkedin.com/in/evan-jonson/" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-blue-600 dark:hover:text-blue-400"><FaLinkedinIn /></a>
-                <a aria-label="GitHub" href="https://github.com/ecjonson" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-blue-600 dark:hover:text-blue-400"><FaGithub /></a>
-                <a aria-label="Chess" href="https://www.chess.com/member/ibahn" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-blue-600 dark:hover:text-blue-400"><FaChessKnight /></a>
-                <Link aria-label="Resume" href="/resume" target="_blank" rel="noopener noreferrer" className="transition-colors hover:text-blue-600 dark:hover:text-blue-400"><FaFileLines /></Link>
+                <div className="flex items-center gap-3">
+                    <ContactLinks />
+                </div>
             </nav>
         </main>
     );
