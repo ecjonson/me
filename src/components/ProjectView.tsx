@@ -2,8 +2,10 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ViewTransition, useEffect, useRef, useState } from "react";
-import type { Project, ProjectSection } from "@/lib/projects";
+import { projects } from "@/lib/projects";
+import type { Project, ProjectLink, ProjectSection } from "@/lib/projects";
 
 /**
  * Mobile-first spacing contract that keeps images clear of the fixed nav.
@@ -91,11 +93,21 @@ export function ProjectView({ project }: { project: Project }) {
     ];
     const [active, setActive] = useState(items[0].id);
 
+    // Sibling projects for the end-of-nav hand-offs. Linear (no wrap): the first
+    // project has no previous and the last has no next, so each control only
+    // appears "when applicable". Driven off the objects directly so TS narrows them.
+    const projectIndex = projects.findIndex((p) => p.slug === project.slug);
+    const prevProject = projects[projectIndex - 1]; // undefined on the first project
+    const nextProject = projects[projectIndex + 1]; // undefined on the last project
+
     // Mobile nav: translate the label strip so the active tab sits at the left,
     // right next to the back button. No horizontal scrolling.
     const itemRefs = useRef<Array<HTMLAnchorElement | null>>([]);
     const [navOffset, setNavOffset] = useState(0);
     const [navReady, setNavReady] = useState(false);
+
+    // The nav element — the scroll handler forwards gestures into the scroller.
+    const navRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
         const root = scrollerRef.current;
@@ -136,15 +148,90 @@ export function ProjectView({ project }: { project: Project }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [active, project.slug]);
 
+    // Forward wheel/touch over the nav straight into the section scroller, so it
+    // scrolls exactly like the page does — same native momentum, same CSS snap.
+    // We don't step or debounce; we just relay the deltas and let scroll-snap land.
+    useEffect(() => {
+        const nav = navRef.current;
+        const root = scrollerRef.current;
+        if (!nav || !root) return;
+
+        const onWheel = (e: WheelEvent) => {
+            // Vertical rail uses deltaY; horizontal mobile strip uses deltaX.
+            const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+            if (delta === 0) return;
+            e.preventDefault(); // relay to the scroller instead of scrolling the page
+            // Normalise line/page deltas to pixels so the feel matches the trackpad.
+            const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? root.clientHeight : 1;
+            // behavior:"auto" overrides the scroller's scroll-smooth so momentum stays 1:1.
+            root.scrollBy({ top: delta * unit, behavior: "auto" });
+        };
+
+        // Touch: track the finger 1:1; snap-mandatory settles on the nearest
+        // section when the finger lifts (no manual fling, but no overshoot either).
+        let lastX = 0;
+        let lastY = 0;
+        const onTouchStart = (e: TouchEvent) => {
+            lastX = e.touches[0].clientX;
+            lastY = e.touches[0].clientY;
+        };
+        const onTouchMove = (e: TouchEvent) => {
+            const x = e.touches[0].clientX;
+            const y = e.touches[0].clientY;
+            const dx = x - lastX;
+            const dy = y - lastY;
+            lastX = x;
+            lastY = y;
+            const delta = Math.abs(dy) >= Math.abs(dx) ? dy : dx;
+            if (delta === 0) return;
+            e.preventDefault();
+            root.scrollBy({ top: -delta, behavior: "auto" }); // drag down/right → go back
+        };
+
+        nav.addEventListener("wheel", onWheel, { passive: false });
+        nav.addEventListener("touchstart", onTouchStart, { passive: true });
+        nav.addEventListener("touchmove", onTouchMove, { passive: false });
+        return () => {
+            nav.removeEventListener("wheel", onWheel);
+            nav.removeEventListener("touchstart", onTouchStart);
+            nav.removeEventListener("touchmove", onTouchMove);
+        };
+         
+    }, [project.slug]);
+
+    // Esc exits to the index, the way a modal closes — reinforces the popup feel.
+    // Mainly a desktop/keyboard nicety, but harmless everywhere. Routes to "/" (home),
+    // matching the back/× controls rather than browser history.
+    const router = useRouter();
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === "Escape" && !e.defaultPrevented) router.push("/");
+        };
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [router]);
+
     return (
         <div className="relative">
-            {/* Desktop back button — top-left, as a bubble matching the nav. */}
+            {/* Desktop back button — top-left, a labeled pill (arrow + text) since the
+                left rail leaves room for it. Mobile keeps the compact bubble below. */}
             <Link
                 href="/"
-                aria-label="Back"
-                className="fixed left-4 top-4 z-50 hidden h-9 w-9 items-center justify-center rounded-full bg-gray-100 text-base text-gray-600 transition-colors hover:text-blue-600 lg:flex dark:bg-gray-800 dark:text-gray-300 dark:hover:text-blue-400"
+                className="fixed left-4 top-4 z-50 hidden items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-sm text-gray-600 transition-colors hover:text-blue-600 lg:flex dark:bg-gray-800 dark:text-gray-300 dark:hover:text-blue-400"
             >
-                ←
+                <span aria-hidden="true">←</span>
+                <span>Back</span>
+            </Link>
+
+            {/* Close (×) — mobile only, where the nav sits at the bottom and the page
+                reads as a popup. On desktop the left rail + top-left back cover this,
+                so a second dismiss control would just be noise. */}
+            <Link
+                href="/"
+                aria-label="Close"
+                className="fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-lg leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-blue-600 lg:hidden dark:bg-gray-800/90 dark:text-gray-300 dark:hover:text-blue-400"
+            >
+                ×
             </Link>
 
             {/* Section outline.
@@ -153,17 +240,48 @@ export function ProjectView({ project }: { project: Project }) {
                 Desktop (lg): left rail, same bubble aesthetic. Slides in last. */}
             <ViewTransition enter="section-nav-in" default="none">
                 <nav
+                    ref={navRef}
                     aria-label="Sections"
-                    className="fixed inset-x-0 bottom-0 z-40 flex h-14 items-center gap-1 border-t border-gray-200/70 bg-white/80 px-2 backdrop-blur-sm lg:inset-x-auto lg:left-0 lg:top-0 lg:h-dvh lg:w-40 lg:flex-col lg:items-start lg:justify-center lg:gap-2 lg:border-t-0 lg:border-r lg:px-4 dark:border-gray-800/70 dark:bg-gray-950/60"
+                    className="fixed inset-x-0 bottom-0 z-40 flex h-14 touch-none items-center gap-1 overscroll-contain border-t border-gray-200/70 bg-white/80 px-2 backdrop-blur-sm lg:inset-x-auto lg:left-0 lg:top-0 lg:h-dvh lg:w-40 lg:flex-col lg:items-start lg:justify-center lg:gap-2 lg:border-t-0 lg:border-r lg:px-4 dark:border-gray-800/70 dark:bg-gray-950/60"
                 >
-                    {/* Mobile back button (bubble). Hidden on desktop — the top-left one shows there. */}
-                    <Link
-                        href="/"
-                        aria-label="Back"
-                        className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-base text-gray-600 transition-colors hover:text-blue-600 lg:hidden dark:bg-gray-800 dark:text-gray-300 dark:hover:text-blue-400"
-                    >
-                        ←
-                    </Link>
+                    {/* Previous project — desktop rail only, pinned at the top to mirror
+                        the "next" link at the bottom. The top-left home arrow stays, so
+                        the rail keeps both. On mobile, prev lives in the bubble below. */}
+                    {prevProject ? (
+                        <>
+                            <Link
+                                href={`/projects/${prevProject.slug}`}
+                                title={`Previous project: ${prevProject.name}`}
+                                className="hidden shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 lg:flex lg:w-full dark:text-blue-400 dark:hover:bg-blue-950/40"
+                            >
+                                <span aria-hidden="true">←</span>
+                                <span className="max-w-32 truncate lg:max-w-full">{prevProject.name}</span>
+                            </Link>
+                            <span aria-hidden="true" className="hidden bg-gray-200 lg:my-1 lg:block lg:h-px lg:w-full dark:bg-gray-800" />
+                        </>
+                    ) : null}
+
+                    {/* Bubble — mobile only. On the first project it's the home/back arrow.
+                        On every other project it becomes "previous project" (blue), since
+                        the top-right × already covers home there. */}
+                    {prevProject ? (
+                        <Link
+                            href={`/projects/${prevProject.slug}`}
+                            aria-label={`Previous project: ${prevProject.name}`}
+                            title={`Previous project: ${prevProject.name}`}
+                            className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-base text-blue-600 transition-colors hover:bg-blue-100 lg:hidden dark:bg-blue-950/50 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                        >
+                            ←
+                        </Link>
+                    ) : (
+                        <Link
+                            href="/"
+                            aria-label="Back"
+                            className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-base text-gray-600 transition-colors hover:text-blue-600 lg:hidden dark:bg-gray-800 dark:text-gray-300 dark:hover:text-blue-400"
+                        >
+                            ←
+                        </Link>
+                    )}
 
                     {/* Clip window (mobile) → dissolves to plain rail items (desktop). */}
                     <div className="relative h-full flex-1 overflow-hidden lg:contents">
@@ -194,6 +312,26 @@ export function ProjectView({ project }: { project: Project }) {
                                     </a>
                                 );
                             })}
+
+                            {/* End-of-nav hand-off to the next project. A real route
+                                Link (not a section anchor), so it's click-only and never
+                                a scroll target — scrolling stays inside this project. */}
+                            {nextProject ? (
+                                <>
+                                    <span
+                                        aria-hidden="true"
+                                        className="mx-1 h-5 w-px shrink-0 self-center bg-gray-200 dark:bg-gray-800 lg:mx-0 lg:my-1 lg:h-px lg:w-full"
+                                    />
+                                    <Link
+                                        href={`/projects/${nextProject.slug}`}
+                                        title={`Next project: ${nextProject.name}`}
+                                        className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 lg:w-full dark:text-blue-400 dark:hover:bg-blue-950/40"
+                                    >
+                                        <span className="max-w-32 truncate lg:max-w-full">{nextProject.name}</span>
+                                        <span aria-hidden="true">→</span>
+                                    </Link>
+                                </>
+                            ) : null}
                         </div>
                     </div>
                 </nav>
@@ -225,11 +363,22 @@ export function ProjectView({ project }: { project: Project }) {
                                 <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">{project.name}</h1>
                                 <p className="mt-3 max-w-2xl text-lg text-gray-200">{project.blurb}</p>
                                 {project.links?.length ? (
-                                    <div className="mt-5 flex flex-wrap gap-4">
-                                        {project.links.map((l) => (
-                                            <a key={l.href} href={l.href} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-300 hover:text-blue-200 hover:underline">
-                                                {l.label} ↗
-                                            </a>
+                                    <div className="mt-5 flex flex-wrap items-baseline gap-x-4 gap-y-2">
+                                        {project.links.map((l: ProjectLink) => (
+                                            <span key={l.href} className="inline-flex items-baseline gap-1.5">
+                                                <a href={l.href} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-300 hover:text-blue-200 hover:underline">
+                                                    {l.label} ↗
+                                                </a>
+                                                {/* Only surfaces below lg, where the tool doesn't work. */}
+                                                {l.desktopOnly ? (
+                                                    <span
+                                                        title="This interactive tool is built for desktop and may not work on mobile."
+                                                        className="rounded-full bg-white/10 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-gray-300 lg:hidden"
+                                                    >
+                                                        desktop only
+                                                    </span>
+                                                ) : null}
+                                            </span>
                                         ))}
                                     </div>
                                 ) : null}
