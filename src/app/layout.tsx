@@ -1,6 +1,18 @@
 import type { Metadata } from "next";
 import "./globals.css";
 
+const themeScript = `
+    (function () {
+        try {
+            var t = localStorage.getItem('theme') || 'system';
+            var m = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (t === 'dark' || (t === 'system' && m)) {
+            document.documentElement.classList.add('dark');
+            }
+        } catch (e) {}
+    })();
+`;
+
 export const metadata: Metadata = {
     title: "Evan Jonson",
     description: "Computer scientist and graphics researcher and programmer.",
@@ -20,8 +32,9 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
             <body>
+                <script dangerouslySetInnerHTML={{ __html: themeScript }} />
                 {children}
             </body>
         </html>
