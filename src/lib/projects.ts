@@ -233,9 +233,9 @@ export const projects: Project[] = [
                 id: "gi",
                 label: "Global illumination",
                 heading: "Color bleeding",
-                body: "The Cornell box earns its fame right here: light bouncing off the red and green walls tints the white surfaces nearby. That subtle color bleed is indirect lighting, the effect that only global illumination, not traditional direct lighting, can reproduce.",
+                body: "The Cornell box earns its fame right here: light bouncing off the red and blue walls tints the white surfaces nearby. That subtle color bleed is indirect lighting, the effect that only global illumination, not traditional direct lighting, can reproduce.",
                 image: "/projects/pathtracing/cornell_box_01.png",
-                alt: "Cornell box render showing color bleeding from the red and green walls.",
+                alt: "Cornell box render showing color bleeding from the red and blue walls.",
                 size: "LG",
             },
             {
