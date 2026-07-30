@@ -3,6 +3,7 @@ import type { Project } from "./types";
 export const pathtracing: Project = {
     slug: "pathtracing",
     name: "Path tracer",
+    year: 2025,
     blurb: "A physically-based path tracer written from scratch in WebGL 1.0, rendering the Cornell box.",
     image: "/projects/pathtracing/cornell_box_01.png", // final / converged render (hero)
     alt: "Path-traced Cornell box, fully converged.",

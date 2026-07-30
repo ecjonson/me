@@ -3,6 +3,7 @@ import type { Project } from "./types";
 export const gmailAddon: Project = {
     slug: "gmail-addon",
     name: "InterAction+ for Gmail",
+    year: 2023,
     blurb: "Senior design project with LexisNexis to extend their Outlook extension toolkit InterAction+ into Google Workspace.",
     image: "/projects/interaction_plus/posters_and_pies_02.jpeg",
     alt: "Senior design posters and pies group photo 2023",

@@ -3,6 +3,7 @@ import type { Project } from "./types";
 export const lowLatencyDisplay: Project = {
     slug: "low-latency-display",
     name: "Low-latency display",
+    year: 2026,
     blurb: "Near-zero latency display system — MSCS thesis research. Image from Emerging Technologies, SIGGRAPH 2026, LA.",
     image: "/projects/thesis/SIGGRAPH_ETech_2026.jpeg",
     alt: "SIGGRAPH Emerging Technologies 2026",

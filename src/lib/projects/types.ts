@@ -18,6 +18,7 @@ export type ProjectSection = {
 export type Project = {
     slug: string;
     name: string;
+    year: number; // used to order the timeline and draw the year separators
     blurb: string;
     image: string;
     alt: string;

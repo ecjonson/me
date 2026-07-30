@@ -3,6 +3,7 @@ import type { Project } from "./types";
 export const fluidsSimulator: Project = {
     slug: "fluids-simulator",
     name: "Fluids simulator",
+    year: 2025,
     blurb: "Fluids simulator with blobby modeling (metaballs) and spring mechanics.",
     image: "/projects/metaball_fluids/metaball_fluids_01.png",
     alt: "Fluids simulator",
