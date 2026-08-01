@@ -25,6 +25,8 @@ export function ProjectCarousel() {
     return (
         <ul className="flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:thin]">
             {projects.map(({ slug, name, year, blurb, image, alt }, i) => {
+                // Trailing marker: sits to the RIGHT of each year's oldest project.
+                // const endYear = i === projects.length - 1 || year !== projects[i + 1].year;
                 const newYear = i === 0 || year !== projects[i - 1].year;
                 return (
                     <Fragment key={slug}>
@@ -40,6 +42,7 @@ export function ProjectCarousel() {
                                             src={image}
                                             alt={alt}
                                             fill
+                                            priority={i === 0}
                                             sizes="160px"
                                             className="object-cover transition-transform duration-300 ease-out group-hover:scale-110 group-active:scale-110"
                                         />
@@ -48,6 +51,7 @@ export function ProjectCarousel() {
                                 <span className="w-40 text-center text-xs text-gray-600 dark:text-gray-400">{name}</span>
                             </Link>
                         </li>
+                        {/* {endYear && <YearMarker year={year} />} */}
                     </Fragment>
                 );
             })}

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { ComponentProps, MouseEvent } from "react";
+import { isReducedMotion } from "@/lib/motion";
 
 type Props = ComponentProps<typeof Link>;
 
@@ -34,9 +35,7 @@ export function TransitionLink({ href, onClick, ...rest }: Props) {
             return;
         }
 
-        const reduce =
-            typeof window !== "undefined" &&
-            window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const reduce = isReducedMotion();
 
         // No View Transitions support (or reduced motion) → plain <Link> nav.
         if (typeof document === "undefined" || !document.startViewTransition || reduce) {

@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useEffect, useState, type MouseEvent } from "react";
-import { FaEnvelope, FaLinkedinIn, FaGithub, FaFileLines, FaRotateLeft, FaChessKnight, FaPaperPlane, FaEnvelopeCircleCheck } from "react-icons/fa6";
-import { ThemeToggle } from "@/components/ThemeToggle";
+import { FaEnvelope, FaLinkedinIn, FaGithub, FaFileLines, FaChessKnight } from "react-icons/fa6";
+import { isReducedMotion } from "@/lib/motion";
+import { SettingsMenu } from "@/components/SettingsMenu";
 import { ProjectCarousel } from "@/components/ProjectCarousel";
 import styles from "./page.module.css";
 
@@ -32,7 +33,7 @@ function Cursor() {
     return <span aria-hidden="true" className={styles.cursor} />;
 }
 
-const linkCls = "inline-flex items-center gap-2 transition-colors hover:text-blue-600 dark:hover:text-blue-400";
+const linkCls = "inline-flex items-center gap-2 transition-colors hover:text-[var(--accent)]";
 const EMAIL = "evancjonson@gmail.com";
 
 // Email is a two-step link with three looks:
@@ -48,7 +49,7 @@ function EmailLink({ showLabel = false }: { showLabel?: boolean }) {
 
     useEffect(() => {
         if (!flash) return;
-        const t = setTimeout(() => setFlash(false), 800);
+        const t = setTimeout(() => setFlash(false), 1000);
         return () => clearTimeout(t);
     }, [flash]);
 
@@ -79,7 +80,7 @@ function EmailLink({ showLabel = false }: { showLabel?: boolean }) {
 
     return (
         <a aria-label={hint} title={hint} href={`mailto:${EMAIL}`} onClick={onClick} className={linkCls}>
-            {flash ? <FaEnvelopeCircleCheck /> : primed ? <FaPaperPlane /> : <FaEnvelope />}
+            <FaEnvelope />
             {showLabel && <span>{flash ? "Copied!" : primed ? "MailTo" : "Email"}</span>}
         </a>
     );
@@ -128,7 +129,7 @@ export default function Home() {
 
     useEffect(() => {
         const greeted = !!sessionStorage.getItem("greeted");
-        const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        const reduce = isReducedMotion();
 
         // skip greeting?
         if (greeted || reduce) {
@@ -242,7 +243,8 @@ export default function Home() {
                             {typedIntoLink && (
                                 <Link
                                     href={CURRENT_PROJECT.href}
-                                    className="text-blue-600 hover:underline dark:text-blue-400"
+                                    // className="text-blue-600 hover:underline dark:text-blue-400"
+                                    className="text-accent hover:underline"
                                 >
                                     {linkTextTyped}
                                 </Link>
@@ -279,25 +281,15 @@ export default function Home() {
                 </section>
             </div>
 
-            {/* Utilities — theme + replay. Top-right on every viewport. The arbitrary
-                variant gives descendant buttons (incl. ThemeToggle) the link pointer. */}
+            {/* Utilities — theme + replay. Top-right on every viewport. */}
             <div
-                className={`fixed right-0 top-0 z-40 flex items-center gap-5 p-4 text-2xl text-gray-600 transition-opacity duration-700 [&_button]:cursor-pointer dark:text-gray-400 lg:p-6 ${
+                className={`fixed right-0 top-0 z-40 flex items-center p-4 text-2xl text-gray-600 transition-opacity duration-700 [&_button]:cursor-pointer dark:text-gray-400 lg:p-6 ${
                     revealed ? "opacity-100" : "opacity-0 pointer-events-none"
                 }`}
             >
-                <ThemeToggle />
-                <button
-                    type="button"
-                    onClick={replayGreeting}
-                    aria-label="Replay intro"
-                    title="Replay intro"
-                    className="transition-colors hover:text-blue-600 dark:hover:text-blue-400"
-                >
-                    <FaRotateLeft />
-                </button>
+                <SettingsMenu onReplay={replayGreeting} />
             </div>
-
+            
             {/* Contact links — mobile bottom bar. Frosted + top border to match the
                 project nav, with a "Get in touch" label and a hairline divider before
                 the icons. Desktop uses the in-flow section above (no separator there). */}
