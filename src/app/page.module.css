@@ -13,7 +13,13 @@
     50%, 100% { opacity: 0; }
 }
 
-/* class-based, so it follows the toggle — not just the OS */
+/* Own colours, following the dark class (incl. custom-bg luminance) — not the accent. */
 :global(.dark) .cursor {
     color: #50fa7b;
+}
+
+/* Steady the caret when motion is reduced. */
+:global(.reduce-motion) .cursor {
+    animation: none;
+    opacity: 1;
 }

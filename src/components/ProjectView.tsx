@@ -217,7 +217,7 @@ export function ProjectView({ project }: { project: Project }) {
                 left rail leaves room for it. Mobile keeps the compact bubble below. */}
             <Link
                 href="/"
-                className="fixed left-4 top-4 z-50 hidden items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-sm text-gray-600 transition-colors hover:text-blue-600 lg:flex dark:bg-gray-800 dark:text-gray-300 dark:hover:text-blue-400"
+                className="fixed left-4 top-4 z-50 hidden items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-sm text-gray-600 transition-colors hover:text-accent lg:flex dark:bg-gray-800 dark:text-gray-300"
             >
                 <span aria-hidden="true">←</span>
                 <span>Back</span>
@@ -229,7 +229,7 @@ export function ProjectView({ project }: { project: Project }) {
             <Link
                 href="/"
                 aria-label="Close"
-                className="fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-lg leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-blue-600 lg:hidden dark:bg-gray-800/90 dark:text-gray-300 dark:hover:text-blue-400"
+                className="fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-lg leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:hidden dark:bg-gray-800/90 dark:text-gray-300"
             >
                 ×
             </Link>
@@ -252,7 +252,7 @@ export function ProjectView({ project }: { project: Project }) {
                             <Link
                                 href={`/projects/${prevProject.slug}`}
                                 title={`Previous project: ${prevProject.name}`}
-                                className="hidden shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 lg:flex lg:w-full dark:text-blue-400 dark:hover:bg-blue-950/40"
+                                className="hidden shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-(--accent-soft) lg:flex lg:w-full"
                             >
                                 <span aria-hidden="true">←</span>
                                 <span className="max-w-32 truncate lg:max-w-full">{prevProject.name}</span>
@@ -269,7 +269,7 @@ export function ProjectView({ project }: { project: Project }) {
                             href={`/projects/${prevProject.slug}`}
                             aria-label={`Previous project: ${prevProject.name}`}
                             title={`Previous project: ${prevProject.name}`}
-                            className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-base text-blue-600 transition-colors hover:bg-blue-100 lg:hidden dark:bg-blue-950/50 dark:text-blue-400 dark:hover:bg-blue-900/50"
+                            className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--accent-soft) text-base text-accent transition-colors hover:bg-(--accent-softer) lg:hidden"
                         >
                             ←
                         </Link>
@@ -277,7 +277,7 @@ export function ProjectView({ project }: { project: Project }) {
                         <Link
                             href="/"
                             aria-label="Back"
-                            className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-base text-gray-600 transition-colors hover:text-blue-600 lg:hidden dark:bg-gray-800 dark:text-gray-300 dark:hover:text-blue-400"
+                            className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-base text-gray-600 transition-colors hover:text-accent lg:hidden dark:bg-gray-800 dark:text-gray-300"
                         >
                             ←
                         </Link>
@@ -325,7 +325,7 @@ export function ProjectView({ project }: { project: Project }) {
                                     <Link
                                         href={`/projects/${nextProject.slug}`}
                                         title={`Next project: ${nextProject.name}`}
-                                        className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-blue-600 transition-colors hover:bg-blue-50 lg:w-full dark:text-blue-400 dark:hover:bg-blue-950/40"
+                                        className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-(--accent-soft) lg:w-full"
                                     >
                                         <span className="max-w-32 truncate lg:max-w-full">{nextProject.name}</span>
                                         <span aria-hidden="true">→</span>
