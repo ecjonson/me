@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { VTDebug } from "@/components/VTDebug";
 
 const themeScript = `
     (function () {
@@ -57,6 +58,7 @@ export default function RootLayout({
         <html lang="en" suppressHydrationWarning>
             <body>
                 <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+                <VTDebug />
                 {children}
             </body>
         </html>
