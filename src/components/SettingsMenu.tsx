@@ -25,7 +25,7 @@ const MOTION_LABEL = { full: "Full", reduced: "Reduced", system: "System" };
 
 const rowCls = "flex w-full items-center justify-between gap-6 text-sm";
 const rowLabel = "text-gray-600 dark:text-gray-400";
-const controlCls = "inline-flex items-center gap-2 transition-colors hover:text-[var(--accent)]";
+const controlCls = "inline-flex items-center gap-2 transition-colors hover:text-accent";
 
 // One custom-colour row: label + a small swatch palette (wraps if the panel is
 // narrow so it can never overflow).
@@ -150,7 +150,7 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
             {open && (
                 <div
                     aria-label="Settings"
-                    className={`absolute right-0 top-full mt-3 max-w-[calc(100vw-2rem)] rounded-2xl border border-gray-200/70 bg-white/90 p-4 text-base text-gray-600 shadow-lg backdrop-blur-md dark:border-gray-800/70 dark:bg-gray-950/85 dark:text-gray-400 ${
+                    className={`absolute right-0 top-full mt-3 max-w-[calc(100vw-2rem)] rounded-2xl border border-accent/25 shadow-[0_2px_18px_-6px_var(--accent)] bg-white/90 p-4 text-base text-gray-600 backdrop-blur-md dark:bg-gray-950/85 dark:text-gray-400 ${
                         isCustom ? "w-80" : "w-60"
                     }`}
                 >
@@ -203,7 +203,7 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
                                 setOpen(false);
                                 onReplay();
                             }}
-                            title={reduced ? "Turn motion back on to replay the intro" : "Replay intro"}
+                            title={reduced ? "Turn motion on to replay the intro" : "Replay intro"}
                             className={`${rowCls} ${reduced ? "opacity-50 disabled:cursor-not-allowed" : controlCls}`}
                         >
                             <span className={rowLabel}>Replay intro</span>
@@ -211,7 +211,7 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
                         </button>
                         {reduced && (
                             <p className="-mt-2 text-xs text-gray-500 dark:text-gray-500">
-                                The intro is animated — turn motion back on to replay it.
+                                The intro is animated — turn motion on to replay it.
                             </p>
                         )}
                     </div>

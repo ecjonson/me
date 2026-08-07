@@ -29,14 +29,18 @@ body {
 /* ================================================================= *
  * View Transitions — carousel thumbnail → project hero choreography
  * -----------------------------------------------------------------
- * Requires `experimental.viewTransition: true` in next.config (see notes).
- * Paste this block into app/globals.css.
+ * Requires `experimental.viewTransition: true` in next.config.
  *
- * On navigating into a project the browser runs ONE transition timeline:
- *   (1) 0ms    the image morphs up from the thumbnail into the framed hero
- *   (2) ~460ms the hero copy fades + rises in
- *   (3) ~720ms the section nav slides in (up on mobile, from the left on desktop)
- * Adjust the delays/durations below to re-time the sequence.
+ * Each animated element carries its own view-transition-name (set in
+ * ProjectView / ProjectBackdrop), so it's captured as its own group and
+ * animated here BY NAME. Without a name they fold into the page-level
+ * snapshot (animation: none) and just pop instead of animating.
+ *
+ * Home → project timeline:
+ *   0ms    image morphs up from the thumbnail into the framed hero
+ *   0ms    section nav slides in (up on mobile / from the left rail on desktop)
+ *   460ms  hero copy fades + rises in (after the image has settled)
+ *   500ms  ambient backdrop fades in (after the morph, always behind the image)
  * ================================================================= */
 
 /* (1) Shared image morph. `.morph` comes from share="morph" on both the
@@ -52,34 +56,36 @@ body {
     40% { filter: blur(2px); }
 }
 
-/* (2) Hero copy — enters after the image has settled. */
-::view-transition-new(.hero-copy-in) {
-    animation: 360ms ease-out 460ms both vt-copy-in;
-}
-@keyframes vt-copy-in {
-    from { opacity: 0; transform: translateY(12px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
+/* (2) Hero copy — fades + rises in after the image settles; fades out on return. */
+::view-transition-new(hero-copy) { animation: 360ms ease-out 460ms both vt-copy-in; }
+::view-transition-old(hero-copy) { animation: 240ms ease-in both vt-copy-out; }
+@keyframes vt-copy-in  { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes vt-copy-out { from { opacity: 1; transform: translateY(0); }    to { opacity: 0; transform: translateY(10px); } }
 
-/* (3) Section nav — enters last.
+/* (3) Section nav — starts WITH the morph (no delay); leaves the same way.
    Default (mobile): slides up from the bottom bar.
    lg and up: slides in from the left rail. */
-::view-transition-new(.section-nav-in) {
-    animation: 420ms cubic-bezier(0.33, 1, 0.68, 1) 720ms both vt-nav-in-up;
-}
-@keyframes vt-nav-in-up {
-    from { opacity: 0; transform: translateY(100%); }
-    to   { opacity: 1; transform: translateY(0); }
-}
+::view-transition-new(section-nav) { animation: 420ms cubic-bezier(0.33, 1, 0.68, 1) both vt-nav-in-up; }
+::view-transition-old(section-nav) { animation: 300ms cubic-bezier(0.4, 0, 1, 1) both vt-nav-out-down; }
+@keyframes vt-nav-in-up    { from { opacity: 0; transform: translateY(100%); } to { opacity: 1; transform: translateY(0); } }
+@keyframes vt-nav-out-down { from { opacity: 1; transform: translateY(0); }    to { opacity: 0; transform: translateY(100%); } }
 @media (min-width: 1024px) {
-    ::view-transition-new(.section-nav-in) {
-        animation-name: vt-nav-in-left;
-    }
+    ::view-transition-new(section-nav) { animation-name: vt-nav-in-left; }
+    ::view-transition-old(section-nav) { animation-name: vt-nav-out-left; }
 }
-@keyframes vt-nav-in-left {
-    from { opacity: 0; transform: translateX(-100%); }
-    to   { opacity: 1; transform: translateX(0); }
-}
+@keyframes vt-nav-in-left  { from { opacity: 0; transform: translateX(-100%); } to { opacity: 1; transform: translateX(0); } }
+@keyframes vt-nav-out-left { from { opacity: 1; transform: translateX(0); }     to { opacity: 0; transform: translateX(-100%); } }
+
+/* (0) Ambient backdrop.
+   z-index keeps its snapshot BEHIND the morphing image for the whole transition.
+   Enter: held hidden through the 500ms morph, then fades in (so it never flashes
+          on top of the image).
+   Exit:  disappears at once as the morph starts — no lingering fade. */
+::view-transition-group(project-backdrop) { z-index: -1; }
+::view-transition-new(project-backdrop) { animation: 420ms ease-out 500ms both vt-backdrop-in; }
+::view-transition-old(project-backdrop) { animation: 1ms linear both vt-backdrop-hide; }
+@keyframes vt-backdrop-in   { from { opacity: 0; } to { opacity: 1; } }
+@keyframes vt-backdrop-hide { from { opacity: 0; } to { opacity: 0; } } /* held hidden = vanishes instantly */
 
 /* Reduced motion: skip movement, let content swap instantly.
    Class-gated so the settings toggle stays authoritative (an explicit
@@ -90,3 +96,51 @@ body {
     animation-duration: 0s !important;
     animation-delay: 0s !important;
 }
+
+/* Accent flourishes */
+::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Project-page ambient wash */
+@keyframes backdrop-drift {
+    from { transform: translate3d(0, 0, 0) scale(1); }
+    to   { transform: translate3d(3%, -3%, 0) scale(1.12); }
+}
+
+/* Carousel greeting roll-in.
+   Each item starts clustered at the LEFT edge of the carousel and slides right
+   into its slot. The start offset is different for every item (a far-right item
+   travels the whole width), so it can't be a fixed value — ProjectCarousel
+   measures each item's resting position and writes it to --roll-from. This
+   keyframe is a PURE slide; the section wrapper (page.tsx) supplies the fade. */
+@keyframes carousel-roll-in {
+    from { transform: translateX(var(--roll-from, -60px)); }
+    to   { transform: translateX(0); }
+}
+/* easeOutExpo — quick launch, long gentle deceleration into the slot. */
+.carousel-roll-in { animation: carousel-roll-in 1000ms cubic-bezier(0.3, 1, 0.6, 1) both; }
+.reduce-motion .carousel-roll-in { animation: none; }
+
+/* "Copied!" bubble */
+@keyframes bubble-pop {
+    from { opacity: 0; transform: translate(-50%, 4px) scale(0.9); }
+    to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+
+/* Directional project↔project slide (whole page moves as one).
+   vw (not %) so every independent group travels the FULL viewport width in sync
+   — a % would move each group by only its own width, desyncing the left rail. */
+@keyframes vt-slide-out-left  { to   { transform: translateX(-100vw); } }
+@keyframes vt-slide-in-right  { from { transform: translateX(100vw); } }
+@keyframes vt-slide-out-right { to   { transform: translateX(100vw); } }
+@keyframes vt-slide-in-left   { from { transform: translateX(-100vw); } }
+html[data-slide="next"]::view-transition-old(*) { animation: vt-slide-out-left  340ms cubic-bezier(0.4,0,0.2,1) both !important; }
+html[data-slide="next"]::view-transition-new(*) { animation: vt-slide-in-right  340ms cubic-bezier(0.4,0,0.2,1) both !important; }
+html[data-slide="prev"]::view-transition-old(*) { animation: vt-slide-out-right 340ms cubic-bezier(0.4,0,0.2,1) both !important; }
+html[data-slide="prev"]::view-transition-new(*) { animation: vt-slide-in-left   340ms cubic-bezier(0.4,0,0.2,1) both !important; }
+
+/* Page-wrapper layer: inert by default (keeps the home→project morph clean);
+   the html[data-slide=…] rules above slide it on prev/next. */
+::view-transition-group(.vt-page),
+::view-transition-old(.vt-page),
+::view-transition-new(.vt-page) { animation: none; }

@@ -4,7 +4,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ViewTransition, useEffect, useRef, useState } from "react";
+import { ProjectBackdrop } from "@/components/ProjectBackdrop";
 import { projects } from "@/lib/projects";
+import { isReducedMotion } from "@/lib/motion";
 import type { Project, ProjectLink, ProjectSection } from "@/lib/projects";
 
 /**
@@ -34,7 +36,7 @@ function SectionBlock({ section: s, index }: { section: ProjectSection; index: n
     const isXL = size === "XL";
 
     // For XL the copy sits over the image on desktop, so it needs light colours there.
-    const labelCls = `mb-2 text-sm font-medium uppercase tracking-wide text-blue-600 dark:text-blue-400 ${isXL ? "lg:text-blue-300 lg:dark:text-blue-300" : ""}`;
+    const labelCls = `mb-2 text-sm font-medium uppercase tracking-wide text-accent ${isXL ? "lg:text-[color-mix(in_srgb,var(--accent)_65%,white)]" : ""}`;
     const headingCls = `text-3xl font-bold tracking-tight sm:text-4xl ${isXL ? "lg:text-white" : ""}`;
     const bodyCls = `mt-4 text-lg leading-relaxed text-gray-600 dark:text-gray-300 ${isXL ? "lg:text-gray-200 lg:dark:text-gray-200" : ""}`;
 
@@ -196,7 +198,7 @@ export function ProjectView({ project }: { project: Project }) {
             nav.removeEventListener("touchstart", onTouchStart);
             nav.removeEventListener("touchmove", onTouchMove);
         };
-         
+
     }, [project.slug]);
 
     // Esc exits to the index, the way a modal closes — reinforces the popup feel.
@@ -211,46 +213,122 @@ export function ProjectView({ project }: { project: Project }) {
         return () => window.removeEventListener("keydown", onKey);
     }, [router]);
 
+    const slideDir = (dir: "next" | "prev") => () => {
+        if (typeof document === "undefined" || isReducedMotion()) return;
+        const root = document.documentElement;
+        root.dataset.slide = dir;
+        window.setTimeout(() => {
+            if (root.dataset.slide === dir) delete root.dataset.slide;
+        }, 700);
+    };
+
+    // Remember the current project so the home carousel can bring this thumbnail
+    // back on-screen for the reverse morph (see ProjectCarousel).
+    useEffect(() => {
+        try { sessionStorage.setItem("lastProject", project.slug); } catch {}
+    }, [project.slug]);
+
+    // Mobile: horizontal swipe swaps projects like flipping between app screens.
+    // Vertical scroll and the nav's own gesture forwarding are untouched — we only
+    // act once a drag is clearly horizontal.
+    useEffect(() => {
+        const root = scrollerRef.current;
+        if (!root) return;
+        if (!window.matchMedia("(max-width: 1023px)").matches) return; // touch/mobile only
+
+        const SWIPE_MIN = 60; // px of horizontal travel to commit
+        const AXIS_LOCK = 12; // px before locking to an axis
+        let startX = 0, startY = 0, dx = 0, dy = 0;
+        let axis: "none" | "x" | "y" = "none";
+
+        const onStart = (e: TouchEvent) => {
+            if (e.touches.length !== 1) { axis = "y"; return; } // pinch/multi → ignore
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+            dx = dy = 0;
+            axis = "none";
+        };
+        const onMove = (e: TouchEvent) => {
+            if (axis === "y") return;
+            dx = e.touches[0].clientX - startX;
+            dy = e.touches[0].clientY - startY;
+            if (axis === "none" && (Math.abs(dx) > AXIS_LOCK || Math.abs(dy) > AXIS_LOCK)) {
+                axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
+            }
+            if (axis === "x") e.preventDefault(); // suppress edge-back / rubber-band
+        };
+        const onEnd = () => {
+            if (axis === "x" && Math.abs(dx) >= SWIPE_MIN) {
+                const goNext = dx < 0;                        // finger left → next
+                const target = goNext ? nextProject : prevProject;
+                if (target) {
+                    slideDir(goNext ? "next" : "prev")();
+                    router.push(`/projects/${target.slug}`);
+                }
+            }
+            axis = "none";
+        };
+
+        root.addEventListener("touchstart", onStart, { passive: true });
+        root.addEventListener("touchmove", onMove, { passive: false });
+        root.addEventListener("touchend", onEnd, { passive: true });
+        return () => {
+            root.removeEventListener("touchstart", onStart);
+            root.removeEventListener("touchmove", onMove);
+            root.removeEventListener("touchend", onEnd);
+        };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [project.slug, prevProject, nextProject]);
+
     return (
-        <div className="relative">
-            {/* Desktop back button — top-left, a labeled pill (arrow + text) since the
-                left rail leaves room for it. Mobile keeps the compact bubble below. */}
-            <Link
-                href="/"
-                className="fixed left-4 top-4 z-50 hidden items-center gap-1.5 rounded-full bg-gray-100 px-3 py-1.5 text-sm text-gray-600 transition-colors hover:text-accent lg:flex dark:bg-gray-800 dark:text-gray-300"
-            >
-                <span aria-hidden="true">←</span>
-                <span>Back</span>
-            </Link>
+        <ViewTransition default="vt-page">
+            <div className="relative">
+                {/* Ambient backdrop. Its view-transition-name (project-backdrop) is set
+                    inside ProjectBackdrop, so it's captured as its own group and fades
+                    in/out via CSS — no React wrapper needed. */}
+                <ProjectBackdrop seed={project.slug} />
 
-            {/* Close (×) — mobile only, where the nav sits at the bottom and the page
-                reads as a popup. On desktop the left rail + top-left back cover this,
-                so a second dismiss control would just be noise. */}
-            <Link
-                href="/"
-                aria-label="Close"
-                className="fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-lg leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:hidden dark:bg-gray-800/90 dark:text-gray-300"
-            >
-                ×
-            </Link>
+                {/* Close (×) — mobile only, where the nav sits at the bottom and the page
+                    reads as a popup. On desktop the left rail (with its Back link) covers
+                    this, so a second dismiss control would just be noise. */}
+                <Link
+                    href="/"
+                    aria-label="Close"
+                    className="fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-lg leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:hidden dark:bg-gray-800/90 dark:text-gray-300"
+                >
+                    ×
+                </Link>
 
-            {/* Section outline.
-                Mobile: bottom bar with a back bubble pinned left + a left-aligned
-                        label strip (active tab sits next to the back button).
-                Desktop (lg): left rail, same bubble aesthetic. Slides in last. */}
-            <ViewTransition enter="section-nav-in" default="none">
+                {/* Section outline.
+                    Mobile: bottom bar with a back bubble pinned left + a left-aligned
+                            label strip (active tab sits next to the back button).
+                    Desktop (lg): left rail, same bubble aesthetic. Carries the
+                    view-transition-name section-nav so it slides in/out as its own group. */}
                 <nav
                     ref={navRef}
                     aria-label="Sections"
+                    style={{ viewTransitionName: "section-nav" }}
                     className="fixed inset-x-0 bottom-0 z-40 flex h-14 touch-none items-center gap-1 overscroll-contain border-t border-gray-200/70 bg-white/80 px-2 backdrop-blur-sm lg:inset-x-auto lg:left-0 lg:top-0 lg:h-dvh lg:w-40 lg:flex-col lg:items-start lg:justify-center lg:gap-2 lg:border-t-0 lg:border-r lg:px-4 dark:border-gray-800/70 dark:bg-gray-950/60"
                 >
+                    {/* Home — desktop only; a compact frosted bubble pinned to the page's
+                        top-left (mirrors the mobile ×). Absolutely positioned so it sits in
+                        the corner rather than the centered rail stack, but kept inside the
+                        nav so it still slides in with the rail. */}
+                    <Link
+                        href="/"
+                        aria-label="Back"
+                        className="absolute left-4 top-4 hidden h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-lg leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:flex dark:bg-gray-800/90 dark:text-gray-300"
+                    >
+                        ←
+                    </Link>
+
                     {/* Previous project — desktop rail only, pinned at the top to mirror
-                        the "next" link at the bottom. The top-left home arrow stays, so
-                        the rail keeps both. On mobile, prev lives in the bubble below. */}
+                        the "next" link at the bottom. On mobile, prev lives in the bubble below. */}
                     {prevProject ? (
                         <>
                             <Link
                                 href={`/projects/${prevProject.slug}`}
+                                onClick={slideDir("prev")}
                                 title={`Previous project: ${prevProject.name}`}
                                 className="hidden shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-(--accent-soft) lg:flex lg:w-full"
                             >
@@ -267,6 +345,7 @@ export function ProjectView({ project }: { project: Project }) {
                     {prevProject ? (
                         <Link
                             href={`/projects/${prevProject.slug}`}
+                            onClick={slideDir("prev")}
                             aria-label={`Previous project: ${prevProject.name}`}
                             title={`Previous project: ${prevProject.name}`}
                             className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--accent-soft) text-base text-accent transition-colors hover:bg-(--accent-softer) lg:hidden"
@@ -324,6 +403,7 @@ export function ProjectView({ project }: { project: Project }) {
                                     />
                                     <Link
                                         href={`/projects/${nextProject.slug}`}
+                                        onClick={slideDir("next")}
                                         title={`Next project: ${nextProject.name}`}
                                         className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-(--accent-soft) lg:w-full"
                                     >
@@ -335,31 +415,34 @@ export function ProjectView({ project }: { project: Project }) {
                         </div>
                     </div>
                 </nav>
-            </ViewTransition>
 
-            {/* Vertical snap scroller */}
-            <div ref={scrollerRef} className="h-dvh snap-y snap-mandatory overflow-y-scroll scroll-smooth">
-                {/* Hero — fullscreen framed image; the image is the morph target and
-                    the copy fades in after (unchanged). */}
-                <section id="hero" className={`relative h-dvh snap-start ${SECTION_FRAME}`}>
-                    <div className="relative h-full w-full">
-                        <ViewTransition name={`project-${project.slug}`} share="morph">
-                            <div className="absolute inset-0 overflow-hidden rounded-2xl">
-                                <Image
-                                    src={project.image}
-                                    alt={project.alt}
-                                    fill
-                                    priority
-                                    sizes="100vw"
-                                    className="object-cover"
-                                    style={{ objectPosition: project.focal ?? "center" }}
-                                />
-                                <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent" />
-                            </div>
-                        </ViewTransition>
+                {/* Vertical snap scroller */}
+                <div ref={scrollerRef} className="h-dvh snap-y snap-mandatory overflow-y-scroll scroll-smooth">
+                    {/* Hero — fullscreen framed image; the image is the morph target and
+                        the copy fades in after. */}
+                    <section id="hero" className={`relative h-dvh snap-start ${SECTION_FRAME}`}>
+                        <div className="relative h-full w-full">
+                            <ViewTransition name={`project-${project.slug}`} share="morph">
+                                <div className="absolute inset-0 overflow-hidden rounded-2xl">
+                                    <Image
+                                        src={project.image}
+                                        alt={project.alt}
+                                        fill
+                                        priority
+                                        sizes="100vw"
+                                        className="object-cover"
+                                        style={{ objectPosition: project.focal ?? "center" }}
+                                    />
+                                    <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent" />
+                                </div>
+                            </ViewTransition>
 
-                        <ViewTransition enter="hero-copy-in" default="none">
-                            <div className="absolute inset-x-0 bottom-0 z-10 mx-auto w-full max-w-5xl px-6 pb-16 sm:px-8">
+                            {/* Hero copy. view-transition-name hero-copy makes it its own
+                                group, so it fades + rises in / fades out via CSS. */}
+                            <div
+                                className="absolute inset-x-0 bottom-0 z-10 mx-auto w-full max-w-5xl px-6 pb-16 sm:px-8"
+                                style={{ viewTransitionName: "hero-copy" }}
+                            >
                                 <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">{project.name}</h1>
                                 <p className="mt-3 max-w-2xl text-lg text-gray-200">{project.blurb}</p>
                                 {project.links?.length ? (
@@ -383,14 +466,14 @@ export function ProjectView({ project }: { project: Project }) {
                                     </div>
                                 ) : null}
                             </div>
-                        </ViewTransition>
-                    </div>
-                </section>
+                        </div>
+                    </section>
 
-                {project.sections.map((s, i) => (
-                    <SectionBlock key={s.id} section={s} index={i} />
-                ))}
+                    {project.sections.map((s, i) => (
+                        <SectionBlock key={s.id} section={s} index={i} />
+                    ))}
+                </div>
             </div>
-        </div>
+        </ViewTransition>
     );
 }
