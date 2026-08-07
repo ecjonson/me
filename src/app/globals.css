@@ -62,6 +62,10 @@ body {
 @keyframes vt-copy-in  { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes vt-copy-out { from { opacity: 1; transform: translateY(0); }    to { opacity: 0; transform: translateY(10px); } }
 
+/* Mobile close (×) */
+::view-transition-new(close-btn) { animation: 360ms ease-out 460ms both vt-copy-in; }
+::view-transition-old(close-btn) { animation: 240ms ease-in  both vt-copy-out; }
+
 /* (3) Section nav — starts WITH the morph (no delay); leaves the same way.
    Default (mobile): slides up from the bottom bar.
    lg and up: slides in from the left rail. */
