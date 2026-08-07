@@ -62,10 +62,6 @@ body {
 @keyframes vt-copy-in  { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes vt-copy-out { from { opacity: 1; transform: translateY(0); }    to { opacity: 0; transform: translateY(10px); } }
 
-/* Mobile close (×) */
-::view-transition-new(close-btn) { animation: 360ms ease-out 460ms both vt-copy-in; }
-::view-transition-old(close-btn) { animation: 240ms ease-in  both vt-copy-out; }
-
 /* (3) Section nav — starts WITH the morph (no delay); leaves the same way.
    Default (mobile): slides up from the bottom bar.
    lg and up: slides in from the left rail. */
@@ -143,8 +139,14 @@ html[data-slide="next"]::view-transition-new(*) { animation: vt-slide-in-right  
 html[data-slide="prev"]::view-transition-old(*) { animation: vt-slide-out-right 340ms cubic-bezier(0.4,0,0.2,1) both !important; }
 html[data-slide="prev"]::view-transition-new(*) { animation: vt-slide-in-left   340ms cubic-bezier(0.4,0,0.2,1) both !important; }
 
-/* Page-wrapper layer: inert by default (keeps the home→project morph clean);
-   the html[data-slide=…] rules above slide it on prev/next. */
+/* Page-wrapper layer.
+   NEW stays inert so the home→project morph is clean (project appears instantly
+   behind the morphing image). OLD only exists when LEAVING a project, so fading
+   it is scoped to the reverse morph — anything that lands in this layer instead
+   of its own named group (as the copy + backdrop do on some mobile engines)
+   now fades with the morph instead of holding full-opacity and popping after.
+   The html[data-slide] rules above still override this (!important) for slides. */
 ::view-transition-group(.vt-page),
-::view-transition-old(.vt-page),
 ::view-transition-new(.vt-page) { animation: none; }
+::view-transition-old(.vt-page) { animation: 260ms ease-in both vt-page-out; }
+@keyframes vt-page-out { to { opacity: 0; } }
