@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState, type MouseEvent } from "react";
-import { FaEnvelope, FaLinkedinIn, FaGithub, FaFileLines, FaChessKnight } from "react-icons/fa6";
+import { FaEnvelope, FaLinkedinIn, FaGithub, FaFileLines, FaChessKnight, FaEnvelopeCircleCheck, FaPaperPlane } from "react-icons/fa6";
 import { isReducedMotion } from "@/lib/motion";
 import { SettingsMenu } from "@/components/SettingsMenu";
 import { ProjectCarousel } from "@/components/ProjectCarousel";
@@ -36,53 +36,58 @@ function Cursor() {
 const linkCls = "inline-flex items-center gap-2 transition-colors hover:text-[var(--accent)]";
 const EMAIL = "evancjonson@gmail.com";
 
-// Email is a two-step link with three looks:
-//   1. envelope + "Email"        → first click copies the address
-//   2. check + "Copied!"         → brief confirmation flash (~1.8s)
-//   3. paper plane + "Email"     → settled "primed" state; click opens the mail app
-// `primed` persists (so clicks always open mail after the first), while `flash`
-// only drives the temporary confirmation. Falls back to opening mail directly if
-// the clipboard API is unavailable or blocked.
+// Email is a two-step link: copy to clipboard, then mailto
 function EmailLink({ showLabel = false }: { showLabel?: boolean }) {
     const [primed, setPrimed] = useState(false);
-    const [flash, setFlash] = useState(false);
+    const [copied, setCopied] = useState(false);
 
+    // Hide the bubble ~1.8s after it appears.
     useEffect(() => {
-        if (!flash) return;
-        const t = setTimeout(() => setFlash(false), 1000);
+        if (!copied) return;
+        const t = setTimeout(() => setCopied(false), 1200);
         return () => clearTimeout(t);
-    }, [flash]);
+    }, [copied]);
+
+    // Revert mail-app mode back to copy after a few idle seconds.
+    useEffect(() => {
+        if (!primed) return;
+        const t = setTimeout(() => setPrimed(false), 6000);
+        return () => clearTimeout(t);
+    }, [primed]);
 
     const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
-        if (primed) return; // already copied → let the mailto proceed
+        if (primed) return; // second click within the window → let the mailto open
         e.preventDefault();
         const clipboard = navigator.clipboard;
         if (clipboard?.writeText) {
             clipboard.writeText(EMAIL).then(
-                () => {
-                    setPrimed(true);
-                    setFlash(true);
-                },
-                () => {
-                    window.location.href = `mailto:${EMAIL}`;
-                }
+                () => { setPrimed(true); setCopied(true); },
+                () => { window.location.href = `mailto:${EMAIL}`; }
             );
         } else {
             window.location.href = `mailto:${EMAIL}`;
         }
     };
 
-    const hint = flash
-        ? "Email copied — click to open your mail app"
+    const hint = copied
+        ? "Email copied — click again to open your mail app"
         : primed
             ? "Open your mail app"
             : "Copy email address";
 
     return (
-        <a aria-label={hint} title={hint} href={`mailto:${EMAIL}`} onClick={onClick} className={linkCls}>
-            <FaEnvelope />
-            {showLabel && <span>{flash ? "Copied!" : primed ? "MailTo" : "Email"}</span>}
-        </a>
+        <span className="relative inline-flex">
+            {copied && (
+                <span role="status" className="pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-md bg-gray-900 px-2 py-1 text-xs font-medium text-white shadow-md ring-1 ring-(--accent)/40 motion-safe:animate-[bubble-pop_180ms_ease-out] dark:bg-gray-800">
+                    Copied!
+                    <span aria-hidden="true" className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-gray-900 dark:border-t-gray-800" />
+                </span>
+            )}
+            <a aria-label={hint} title={hint} href={`mailto:${EMAIL}`} onClick={onClick} className={linkCls}>
+                {copied ? <FaEnvelopeCircleCheck /> : primed ? <FaPaperPlane /> : <FaEnvelope />}
+                {showLabel && <span>{copied ? "Copied!" : primed ? "MailTo" : "Email"}</span>}
+            </a>
+        </span>
     );
 }
 
@@ -266,7 +271,7 @@ export default function Home() {
                 } ${revealed ? "opacity-100" : "opacity-0"}`}
             >
                 <section>
-                    <ProjectCarousel />
+                    <ProjectCarousel intro={started && revealed} />
                 </section>
 
                 {/* Links — desktop only, in-flow below the projects with a bit of context.

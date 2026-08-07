@@ -5,7 +5,7 @@ const THEME_KEY = "theme";
 const CUSTOM_KEY = "customTheme";
 
 // A Dracula-flavoured starting point (matches the site's existing accents).
-export const DEFAULT_CUSTOM: CustomColors = { primary: "#0f172a", accent: "#F1FA8C" };
+export const DEFAULT_CUSTOM: CustomColors = { primary: "#0f172a", accent: "#50FA7B" };
 
 // Swatch palettes for the custom-theme pickers. Text is not a choice — it's
 // derived from the primary's luminance (see applyTheme).
