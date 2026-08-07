@@ -150,3 +150,6 @@ html[data-slide="prev"]::view-transition-new(*) { animation: vt-slide-in-left   
 ::view-transition-new(.vt-page) { animation: none; }
 ::view-transition-old(.vt-page) { animation: 260ms ease-in both vt-page-out; }
 @keyframes vt-page-out { to { opacity: 0; } }
+
+::view-transition-old(hero-copy),
+::view-transition-old(project-backdrop) { display: none !important; }
