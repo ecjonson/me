@@ -304,117 +304,118 @@ export function ProjectView({ project }: { project: Project }) {
                             label strip (active tab sits next to the back button).
                     Desktop (lg): left rail, same bubble aesthetic. Carries the
                     view-transition-name section-nav so it slides in/out as its own group. */}
-                <nav
-                    ref={navRef}
-                    aria-label="Sections"
-                    style={{ viewTransitionName: "section-nav" }}
-                    className="fixed inset-x-0 bottom-0 z-40 flex h-14 touch-none items-center gap-1 overscroll-contain border-t border-gray-200/70 bg-white/80 px-2 backdrop-blur-sm lg:inset-x-auto lg:left-0 lg:top-0 lg:h-dvh lg:w-40 lg:flex-col lg:items-start lg:justify-center lg:gap-2 lg:border-t-0 lg:border-r lg:px-4 dark:border-gray-800/70 dark:bg-gray-950/60"
-                >
-                    {/* Home — desktop only; a compact frosted bubble pinned to the page's
+                <ViewTransition name="section-nav">
+                    <nav
+                        ref={navRef}
+                        aria-label="Sections"
+                        className="fixed inset-x-0 bottom-0 z-40 flex h-14 touch-none items-center gap-1 overscroll-contain border-t border-gray-200/70 bg-white/80 px-2 backdrop-blur-sm lg:inset-x-auto lg:left-0 lg:top-0 lg:h-dvh lg:w-40 lg:flex-col lg:items-start lg:justify-center lg:gap-2 lg:border-t-0 lg:border-r lg:px-4 dark:border-gray-800/70 dark:bg-gray-950/60"
+                    >
+                        {/* Home — desktop only; a compact frosted bubble pinned to the page's
                         top-left (mirrors the mobile ×). Absolutely positioned so it sits in
                         the corner rather than the centered rail stack, but kept inside the
                         nav so it still slides in with the rail. */}
-                    <Link
-                        href="/"
-                        aria-label="Back"
-                        className="absolute left-4 top-4 hidden h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-lg leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:flex dark:bg-gray-800/90 dark:text-gray-300"
-                    >
-                        ←
-                    </Link>
-
-                    {/* Previous project — desktop rail only, pinned at the top to mirror
-                        the "next" link at the bottom. On mobile, prev lives in the bubble below. */}
-                    {prevProject ? (
-                        <>
-                            <Link
-                                href={`/projects/${prevProject.slug}`}
-                                onClick={slideDir("prev")}
-                                title={`Previous project: ${prevProject.name}`}
-                                className="hidden shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-(--accent-soft) lg:flex lg:w-full"
-                            >
-                                <span aria-hidden="true">←</span>
-                                <span className="max-w-32 truncate lg:max-w-full">{prevProject.name}</span>
-                            </Link>
-                            <span aria-hidden="true" className="hidden bg-gray-200 lg:my-1 lg:block lg:h-px lg:w-full dark:bg-gray-800" />
-                        </>
-                    ) : null}
-
-                    {/* Bubble — mobile only. On the first project it's the home/back arrow.
-                        On every other project it becomes "previous project" (blue), since
-                        the top-right × already covers home there. */}
-                    {prevProject ? (
-                        <Link
-                            href={`/projects/${prevProject.slug}`}
-                            onClick={slideDir("prev")}
-                            aria-label={`Previous project: ${prevProject.name}`}
-                            title={`Previous project: ${prevProject.name}`}
-                            className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--accent-soft) text-base text-accent transition-colors hover:bg-(--accent-softer) lg:hidden"
-                        >
-                            ←
-                        </Link>
-                    ) : (
                         <Link
                             href="/"
                             aria-label="Back"
-                            className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-base text-gray-600 transition-colors hover:text-accent lg:hidden dark:bg-gray-800 dark:text-gray-300"
+                            className="absolute left-4 top-4 hidden h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-lg leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:flex dark:bg-gray-800/90 dark:text-gray-300"
                         >
                             ←
                         </Link>
-                    )}
 
-                    {/* Clip window (mobile) → dissolves to plain rail items (desktop). */}
-                    <div className="relative h-full flex-1 overflow-hidden lg:contents">
-                        <div
-                            style={{ transform: `translateX(${navOffset}px)` }}
-                            className={`absolute left-0 top-0 flex h-full items-center gap-2 will-change-transform lg:contents ${
-                                navReady ? "motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-out" : ""
-                            }`}
-                        >
-                            {items.map((item, idx) => {
-                                const isActive = active === item.id;
-                                return (
-                                    <a
-                                        key={item.id}
-                                        ref={(el) => {
-                                            itemRefs.current[idx] = el;
-                                        }}
-                                        href={`#${item.id}`}
-                                        aria-current={isActive ? "true" : undefined}
-                                        title={item.label}
-                                        className={`max-w-36 shrink-0 truncate rounded-full px-3 py-1.5 text-xs transition-colors lg:max-w-full ${
-                                            isActive
-                                                ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
-                                                : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
-                                        }`}
-                                    >
-                                        {item.label}
-                                    </a>
-                                );
-                            })}
+                        {/* Previous project — desktop rail only, pinned at the top to mirror
+                        the "next" link at the bottom. On mobile, prev lives in the bubble below. */}
+                        {prevProject ? (
+                            <>
+                                <Link
+                                    href={`/projects/${prevProject.slug}`}
+                                    onClick={slideDir("prev")}
+                                    title={`Previous project: ${prevProject.name}`}
+                                    className="hidden shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-(--accent-soft) lg:flex lg:w-full"
+                                >
+                                    <span aria-hidden="true">←</span>
+                                    <span className="max-w-32 truncate lg:max-w-full">{prevProject.name}</span>
+                                </Link>
+                                <span aria-hidden="true" className="hidden bg-gray-200 lg:my-1 lg:block lg:h-px lg:w-full dark:bg-gray-800" />
+                            </>
+                        ) : null}
 
-                            {/* End-of-nav hand-off to the next project. A real route
+                        {/* Bubble — mobile only. On the first project it's the home/back arrow.
+                        On every other project it becomes "previous project" (blue), since
+                        the top-right × already covers home there. */}
+                        {prevProject ? (
+                            <Link
+                                href={`/projects/${prevProject.slug}`}
+                                onClick={slideDir("prev")}
+                                aria-label={`Previous project: ${prevProject.name}`}
+                                title={`Previous project: ${prevProject.name}`}
+                                className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--accent-soft) text-base text-accent transition-colors hover:bg-(--accent-softer) lg:hidden"
+                            >
+                                ←
+                            </Link>
+                        ) : (
+                            <Link
+                                href="/"
+                                aria-label="Back"
+                                className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-base text-gray-600 transition-colors hover:text-accent lg:hidden dark:bg-gray-800 dark:text-gray-300"
+                            >
+                                ←
+                            </Link>
+                        )}
+
+                        {/* Clip window (mobile) → dissolves to plain rail items (desktop). */}
+                        <div className="relative h-full flex-1 overflow-hidden lg:contents">
+                            <div
+                                style={{ transform: `translateX(${navOffset}px)` }}
+                                className={`absolute left-0 top-0 flex h-full items-center gap-2 will-change-transform lg:contents ${
+                                    navReady ? "motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-out" : ""
+                                }`}
+                            >
+                                {items.map((item, idx) => {
+                                    const isActive = active === item.id;
+                                    return (
+                                        <a
+                                            key={item.id}
+                                            ref={(el) => {
+                                                itemRefs.current[idx] = el;
+                                            }}
+                                            href={`#${item.id}`}
+                                            aria-current={isActive ? "true" : undefined}
+                                            title={item.label}
+                                            className={`max-w-36 shrink-0 truncate rounded-full px-3 py-1.5 text-xs transition-colors lg:max-w-full ${
+                                                isActive
+                                                    ? "bg-gray-900 text-white dark:bg-gray-100 dark:text-gray-900"
+                                                    : "text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800"
+                                            }`}
+                                        >
+                                            {item.label}
+                                        </a>
+                                    );
+                                })}
+
+                                {/* End-of-nav hand-off to the next project. A real route
                                 Link (not a section anchor), so it's click-only and never
                                 a scroll target — scrolling stays inside this project. */}
-                            {nextProject ? (
-                                <>
-                                    <span
-                                        aria-hidden="true"
-                                        className="mx-1 h-5 w-px shrink-0 self-center bg-gray-200 dark:bg-gray-800 lg:mx-0 lg:my-1 lg:h-px lg:w-full"
-                                    />
-                                    <Link
-                                        href={`/projects/${nextProject.slug}`}
-                                        onClick={slideDir("next")}
-                                        title={`Next project: ${nextProject.name}`}
-                                        className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-(--accent-soft) lg:w-full"
-                                    >
-                                        <span className="max-w-32 truncate lg:max-w-full">{nextProject.name}</span>
-                                        <span aria-hidden="true">→</span>
-                                    </Link>
-                                </>
-                            ) : null}
+                                {nextProject ? (
+                                    <>
+                                        <span
+                                            aria-hidden="true"
+                                            className="mx-1 h-5 w-px shrink-0 self-center bg-gray-200 dark:bg-gray-800 lg:mx-0 lg:my-1 lg:h-px lg:w-full"
+                                        />
+                                        <Link
+                                            href={`/projects/${nextProject.slug}`}
+                                            onClick={slideDir("next")}
+                                            title={`Next project: ${nextProject.name}`}
+                                            className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-(--accent-soft) lg:w-full"
+                                        >
+                                            <span className="max-w-32 truncate lg:max-w-full">{nextProject.name}</span>
+                                            <span aria-hidden="true">→</span>
+                                        </Link>
+                                    </>
+                                ) : null}
+                            </div>
                         </div>
-                    </div>
-                </nav>
+                    </nav>
+                </ViewTransition>
 
                 {/* Vertical snap scroller */}
                 <div ref={scrollerRef} className="h-dvh snap-y snap-mandatory overflow-y-scroll scroll-smooth">
