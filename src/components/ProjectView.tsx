@@ -294,6 +294,7 @@ export function ProjectView({ project }: { project: Project }) {
                 <Link
                     href="/"
                     aria-label="Close"
+                    style={{ viewTransitionName: "close-btn" }}
                     className="fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-lg leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:hidden dark:bg-gray-800/90 dark:text-gray-300"
                 >
                     ×
