@@ -27,8 +27,7 @@ const rowCls = "flex w-full items-center justify-between gap-6 text-sm";
 const rowLabel = "text-gray-600 dark:text-gray-400";
 const controlCls = "inline-flex items-center gap-2 transition-colors hover:text-accent";
 
-// One custom-colour row: label + a small swatch palette (wraps if the panel is
-// narrow so it can never overflow).
+// custom-colour row
 function SwatchRow({ label, value, swatches, onPick }: {
     label: string;
     value: string;
@@ -61,21 +60,16 @@ function SwatchRow({ label, value, swatches, onPick }: {
     );
 }
 
-// The collapsible container. A gear button opens a frosted popover; closes on
-// outside-click / Escape. Theme + motion state live here so the custom-colour
-// rows and the replay-disabled state can react to them.
+// collapsible settings container
 export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
     const [open, setOpen] = useState(false);
-    // Lazy initialisers read localStorage; the closed trigger's markup doesn't
-    // depend on them, so there's no hydration mismatch — and the inline script in
-    // layout.tsx already painted the correct colours, so nothing flashes.
     const [theme, setThemeState] = useState<Theme>(() => getTheme());
     const [custom, setCustomState] = useState<CustomColors>(() => getCustomColors());
     const [motion, setMotionState] = useState<MotionPref>(() => getMotionPref());
     const [systemReduced, setSystemReduced] = useState(() => systemPrefersReduced());
     const ref = useRef<HTMLDivElement>(null);
 
-    // Re-apply theme if the OS scheme flips while on "System".
+    // re-apply theme if the OS scheme flips while on "System"
     useEffect(() => {
         if (theme !== "system") return;
         const mq = window.matchMedia("(prefers-color-scheme: dark)");
@@ -84,7 +78,7 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
         return () => mq.removeEventListener("change", onChange);
     }, [theme]);
 
-    // Track the OS reduced-motion setting (keeps replay-disabled correct on "System").
+    // track the OS reduced-motion setting (keeps replay-disabled correct on "System")
     useEffect(() => {
         const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
         const onChange = () => {
@@ -95,7 +89,7 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
         return () => mq.removeEventListener("change", onChange);
     }, [motion]);
 
-    // Close on outside-click / Escape.
+    // close on outside-click / Escape
     useEffect(() => {
         if (!open) return;
         const onPointer = (e: PointerEvent) => {
@@ -155,7 +149,7 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
                     }`}
                 >
                     <div className="flex flex-col gap-4">
-                        {/* Theme */}
+                        {/* theme */}
                         <div className={rowCls}>
                             <span className={rowLabel}>Theme</span>
                             <button
@@ -170,7 +164,7 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
                             </button>
                         </div>
 
-                        {/* Custom colours — only while the custom theme is active */}
+                        {/* custom colours*/}
                         {isCustom && (
                             <div className="flex flex-col gap-3 rounded-xl bg-gray-500/5 p-3 dark:bg-white/5">
                                 <SwatchRow label="Primary" value={custom.primary} swatches={PRIMARY_SWATCHES} onPick={(c) => pickColor({ primary: c })} />
@@ -178,7 +172,7 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
                             </div>
                         )}
 
-                        {/* Motion */}
+                        {/* motion */}
                         <div className={rowCls}>
                             <span className={rowLabel}>Motion</span>
                             <button
@@ -195,7 +189,7 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
 
                         <hr className="border-gray-200 dark:border-gray-800" />
 
-                        {/* Replay */}
+                        {/* replay */}
                         <button
                             type="button"
                             disabled={reduced}

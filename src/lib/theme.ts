@@ -4,11 +4,9 @@ export type CustomColors = { primary: string; accent: string };
 const THEME_KEY = "theme";
 const CUSTOM_KEY = "customTheme";
 
-// A Dracula-flavoured starting point (matches the site's existing accents).
 export const DEFAULT_CUSTOM: CustomColors = { primary: "#0f172a", accent: "#50FA7B" };
 
-// Swatch palettes for the custom-theme pickers. Text is not a choice — it's
-// derived from the primary's luminance (see applyTheme).
+// swatch palettes for the custom-theme pickers
 export const PRIMARY_SWATCHES = ["#ffffff", "#faf7f0", "#0a0a0a", "#282a36", "#0f172a", "#1a1b26"];
 export const ACCENT_SWATCHES  = ["#BD93F9", "#FF79C6", "#FF5555", "#F1FA8C", "#50FA7B", "#8BE9FD"];
 
@@ -35,8 +33,7 @@ export function getCustomColors(): CustomColors {
     return DEFAULT_CUSTOM;
 }
 
-// WCAG relative luminance → decide whether the primary reads as "dark", so the
-// text / grays / borders / cursor (all keyed to .dark) stay legible in custom mode.
+// WCAG relative luminance
 export function isDarkColor(hex: string): boolean {
     let m = hex.replace("#", "");
     if (m.length === 3) m = m.split("").map((c) => c + c).join("");
@@ -47,9 +44,7 @@ export function isDarkColor(hex: string): boolean {
     return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b) < 0.5;
 }
 
-// Custom mode writes primary + accent inline on <html> (inline styles beat the
-// stylesheet's :root / .dark). Foreground is intentionally NOT set — it's left to
-// the .dark class (toggled by the primary's luminance), so text derives itself.
+// custom mode writes primary + accent inline on <html>
 export function applyTheme(theme: Theme, custom: CustomColors = getCustomColors()): void {
     if (typeof document === "undefined") return;
     const root = document.documentElement;

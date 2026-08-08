@@ -9,16 +9,10 @@ import { projects } from "@/lib/projects";
 import { isReducedMotion } from "@/lib/motion";
 import type { Project, ProjectLink, ProjectSection } from "@/lib/projects";
 
-/**
- * Mobile-first spacing contract that keeps images clear of the fixed nav.
- *   mobile: bottom bar  -> reserve bottom space (pb-20), small margins elsewhere
- *   desktop: left rail  -> reserve left space (lg:pl-44), normal bottom
- * box-border (Tailwind default) keeps h-dvh + padding == one screen.
- */
+/** mobile-first spacing contract that keeps images clear of the fixed nav */
 const SECTION_FRAME = "pt-3 pr-3 pl-3 pb-20 lg:pt-6 lg:pr-6 lg:pb-6 lg:pl-44";
 
-// Desktop image width per `size`. MD = half text / half image; XL fills the
-// frame with the copy overlaid. (Mobile stacking is unaffected by size.)
+// desktop image width per `size`
 type SectionSize = "XS" | "SM" | "MD" | "LG" | "XL";
 const IMAGE_BASIS_LG: Record<SectionSize, string> = {
     XS: "lg:basis-1/4",
@@ -29,13 +23,13 @@ const IMAGE_BASIS_LG: Record<SectionSize, string> = {
 };
 
 function SectionBlock({ section: s, index }: { section: ProjectSection; index: number }) {
-    // Alternates the stack/split order: even = image first, odd = text first.
+    // alternates the stack/split order: even = image first, odd = text first
     const reverse = index % 2 === 1;
     const hasImage = !!s.image;
     const size = (s.size ?? "MD") as SectionSize;
     const isXL = size === "XL";
 
-    // For XL the copy sits over the image on desktop, so it needs light colours there.
+    // for XL the copy sits over the image on desktop, so it needs light colours there
     const labelCls = `mb-2 text-sm font-medium uppercase tracking-wide text-accent ${isXL ? "lg:text-[color-mix(in_srgb,var(--accent)_65%,white)]" : ""}`;
     const headingCls = `text-3xl font-bold tracking-tight sm:text-4xl ${isXL ? "lg:text-white" : ""}`;
     const bodyCls = `mt-4 text-lg leading-relaxed text-gray-600 dark:text-gray-300 ${isXL ? "lg:text-gray-200 lg:dark:text-gray-200" : ""}`;
@@ -58,10 +52,10 @@ function SectionBlock({ section: s, index }: { section: ProjectSection; index: n
 
     return (
         <section id={s.id} className={`relative h-dvh snap-start ${SECTION_FRAME}`}>
-            {/* Mobile: stacked split (order alternating), unaffected by size.
-                Desktop: image width follows `size`; XL fills and the copy overlays. */}
+            {/* mobile: stacked split (order alternating), unaffected by size.
+                desktop: image width follows `size`; XL fills and the copy overlays. */}
             <div className={`relative flex h-full w-full gap-4 lg:gap-6 ${reverse ? "flex-col-reverse lg:flex-row-reverse" : "flex-col lg:flex-row"}`}>
-                {/* Image: stacked band on mobile; sized column (or full-bleed for XL) on desktop */}
+                {/* image: stacked band on mobile; sized column (or full-bleed for XL) on desktop */}
                 <div
                     className={`relative w-full shrink-0 basis-2/5 overflow-hidden rounded-2xl ${
                         isXL ? "lg:absolute lg:inset-0" : IMAGE_BASIS_LG[size]
@@ -75,7 +69,7 @@ function SectionBlock({ section: s, index }: { section: ProjectSection; index: n
                         className="object-cover"
                         style={{ objectPosition: s.focal ?? "center" }}
                     />
-                    {/* Readability scrim — only when the copy overlays (XL, desktop). */}
+                    {/* readability scrim — only when the copy overlays (XL, desktop). */}
                     {isXL && <div className="absolute inset-0 hidden bg-linear-to-r from-black/70 via-black/20 to-transparent lg:block" />}
                 </div>
                 {/* Text */}
@@ -95,20 +89,17 @@ export function ProjectView({ project }: { project: Project }) {
     ];
     const [active, setActive] = useState(items[0].id);
 
-    // Sibling projects for the end-of-nav hand-offs. Linear (no wrap): the first
-    // project has no previous and the last has no next, so each control only
-    // appears "when applicable". Driven off the objects directly so TS narrows them.
+    // sibling projects for the end-of-nav hand-offs
     const projectIndex = projects.findIndex((p) => p.slug === project.slug);
     const prevProject = projects[projectIndex - 1]; // undefined on the first project
     const nextProject = projects[projectIndex + 1]; // undefined on the last project
 
-    // Mobile nav: translate the label strip so the active tab sits at the left,
-    // right next to the back button. No horizontal scrolling.
+    // mobile nav
     const itemRefs = useRef<Array<HTMLAnchorElement | null>>([]);
     const [navOffset, setNavOffset] = useState(0);
     const [navReady, setNavReady] = useState(false);
 
-    // The nav element — the scroll handler forwards gestures into the scroller.
+    // nav element
     const navRef = useRef<HTMLElement>(null);
 
     useEffect(() => {
@@ -131,7 +122,7 @@ export function ProjectView({ project }: { project: Project }) {
 
     useEffect(() => {
         const realign = () => {
-            // Desktop is a vertical rail — no horizontal offset.
+            // desktop is a vertical rail — no horizontal offset
             if (window.matchMedia("(min-width: 1024px)").matches) {
                 setNavOffset(0);
                 setNavReady(true);
@@ -140,7 +131,7 @@ export function ProjectView({ project }: { project: Project }) {
             const idx = items.findIndex((i) => i.id === active);
             const el = itemRefs.current[idx];
             if (!el) return;
-            // Left-align the active tab (its left edge to the strip's left edge).
+            // left-align the active tab (its left edge to the strip's left edge)
             setNavOffset(-el.offsetLeft);
             setNavReady(true);
         };
@@ -150,9 +141,7 @@ export function ProjectView({ project }: { project: Project }) {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [active, project.slug]);
 
-    // Forward wheel/touch over the nav straight into the section scroller, so it
-    // scrolls exactly like the page does — same native momentum, same CSS snap.
-    // We don't step or debounce; we just relay the deltas and let scroll-snap land.
+    // forward wheel/touch over the nav straight into the section scroller
     useEffect(() => {
         const nav = navRef.current;
         const root = scrollerRef.current;
@@ -169,8 +158,7 @@ export function ProjectView({ project }: { project: Project }) {
             root.scrollBy({ top: delta * unit, behavior: "auto" });
         };
 
-        // Touch: track the finger 1:1; snap-mandatory settles on the nearest
-        // section when the finger lifts (no manual fling, but no overshoot either).
+        // touch: track the finger 1:1; snap-mandatory settles on the nearest section
         let lastX = 0;
         let lastY = 0;
         const onTouchStart = (e: TouchEvent) => {
@@ -201,16 +189,10 @@ export function ProjectView({ project }: { project: Project }) {
 
     }, [project.slug]);
 
-    // Esc exits to the index, the way a modal closes — reinforces the popup feel.
-    // Mainly a desktop/keyboard nicety, but harmless everywhere. Routes to "/" (home),
-    // matching the back/× controls rather than browser history.
+    // Esc exits to the index, the way a modal closes
     const router = useRouter();
 
-    // Warm "/" as soon as a project opens. Esc and the back gesture route via
-    // router.push rather than a <Link>, so they get no prefetch of their own —
-    // and if home isn't ready when the transition ends, the browser tears down
-    // the snapshots before React has committed it, which shows up as the old
-    // page flashing back for a frame.
+    // warm "/" as soon as a project opens
     useEffect(() => { router.prefetch("/"); }, [router]);
 
     useEffect(() => {
@@ -232,15 +214,12 @@ export function ProjectView({ project }: { project: Project }) {
         }, 700);
     };
 
-    // Remember the current project so the home carousel can bring this thumbnail
-    // back on-screen for the reverse morph (see ProjectCarousel).
+    // remember the current project
     useEffect(() => {
         try { sessionStorage.setItem("lastProject", project.slug); } catch {}
     }, [project.slug]);
 
-    // Mobile: horizontal swipe swaps projects like flipping between app screens.
-    // Vertical scroll and the nav's own gesture forwarding are untouched — we only
-    // act once a drag is clearly horizontal.
+    // mobile: horizontal swipe swaps projects like flipping between app screens
     useEffect(() => {
         const root = scrollerRef.current;
         if (!root) return;
@@ -269,7 +248,7 @@ export function ProjectView({ project }: { project: Project }) {
         };
         const onEnd = () => {
             if (axis === "x" && Math.abs(dx) >= SWIPE_MIN) {
-                const goNext = dx < 0;                        // finger left → next
+                const goNext = dx < 0; // finger left → next
                 const target = goNext ? nextProject : prevProject;
                 if (target) {
                     slideDir(goNext ? "next" : "prev")();
@@ -293,14 +272,10 @@ export function ProjectView({ project }: { project: Project }) {
     return (
         <ViewTransition default="vt-page">
             <div className="relative">
-                {/* Ambient backdrop. Carries `vt-backdrop`, which names it project-backdrop
-                    at every size (see globals.css) — its own group is what keeps the wash
-                    behind the morphing image, and it fades in on arrival only. */}
+                {/* ambient backdrop */}
                 <ProjectBackdrop seed={project.slug} />
 
-                {/* Close (×) — mobile only, where the nav sits at the bottom and the page
-                    reads as a popup. On desktop the left rail (with its Back link) covers
-                    this, so a second dismiss control would just be noise. */}
+                {/* close (×) — mobile only */}
                 <Link
                     href="/"
                     aria-label="Close"
@@ -310,25 +285,13 @@ export function ProjectView({ project }: { project: Project }) {
                     ×
                 </Link>
 
-                {/* Section outline.
-                    Mobile: bottom bar with a back bubble pinned left + a left-aligned
-                            label strip (active tab sits next to the back button).
-                    Desktop (lg): left rail, same bubble aesthetic.
-                    `vt-section-nav` applies view-transition-name: section-nav at every
-                    size (see globals.css), so the bar is captured as its own group. Only
-                    the desktop rail is choreographed, though — on mobile the bar is the
-                    twin of home's contact bar, and sliding one out while an identical one
-                    slides in just reads as jitter, so it arrives instantly instead. */}
+                {/* section outline. */}
                 <nav
                     ref={navRef}
                     aria-label="Sections"
                     className="vt-section-nav fixed inset-x-0 bottom-0 z-40 flex h-14 touch-none items-center gap-1 overscroll-contain border-t border-gray-200/70 bg-white/80 px-2 backdrop-blur-sm lg:inset-x-auto lg:left-0 lg:top-0 lg:h-dvh lg:w-40 lg:flex-col lg:items-start lg:justify-center lg:gap-2 lg:border-t-0 lg:border-r lg:px-4 dark:border-gray-800/70 dark:bg-gray-950/60"
                 >
-                    {/* Home — desktop only; a compact frosted pill pinned to the page's
-                        top-left (mirrors the mobile ×). Absolutely positioned so it sits in
-                        the corner rather than the centered rail stack, but kept inside the
-                        nav so it still slides in with the rail. The arrow is decorative;
-                        the "Back" label is the accessible name. */}
+                    {/* home — desktop only */}
                     <Link
                         href="/"
                         title="Back to projects"
@@ -339,8 +302,7 @@ export function ProjectView({ project }: { project: Project }) {
                         Back
                     </Link>
 
-                    {/* Previous project — desktop rail only, pinned at the top to mirror
-                        the "next" link at the bottom. On mobile, prev lives in the bubble below. */}
+                    {/* previous project — desktop rail only */}
                     {prevProject ? (
                         <>
                             <Link
@@ -356,9 +318,7 @@ export function ProjectView({ project }: { project: Project }) {
                         </>
                     ) : null}
 
-                    {/* Bubble — mobile only. On the first project it's the home/back arrow.
-                        On every other project it becomes "previous project" (blue), since
-                        the top-right × already covers home there. */}
+                    {/* bubble — mobile only */}
                     {prevProject ? (
                         <Link
                             href={`/projects/${prevProject.slug}`}
@@ -380,7 +340,7 @@ export function ProjectView({ project }: { project: Project }) {
                         </Link>
                     )}
 
-                    {/* Clip window (mobile) → dissolves to plain rail items (desktop). */}
+                    {/* clip window (mobile) → dissolves to plain rail items (desktop) */}
                     <div className="relative h-full flex-1 overflow-hidden lg:contents">
                         <div
                             style={{ transform: `translateX(${navOffset}px)` }}
@@ -410,9 +370,7 @@ export function ProjectView({ project }: { project: Project }) {
                                 );
                             })}
 
-                            {/* End-of-nav hand-off to the next project. A real route
-                                Link (not a section anchor), so it's click-only and never
-                                a scroll target — scrolling stays inside this project. */}
+                            {/* end-of-nav hand-off to the next project */}
                             {nextProject ? (
                                 <>
                                     <span
@@ -434,10 +392,9 @@ export function ProjectView({ project }: { project: Project }) {
                     </div>
                 </nav>
 
-                {/* Vertical snap scroller */}
+                {/* vertical snap scroller */}
                 <div ref={scrollerRef} className="vt-page-body h-dvh snap-y snap-mandatory overflow-y-scroll scroll-smooth">
-                    {/* Hero — fullscreen framed image; the image is the morph target and
-                        the copy fades in after. */}
+                    {/* hero — fullscreen framed image */}
                     <section id="hero" className={`relative h-dvh snap-start ${SECTION_FRAME}`}>
                         <div className="relative h-full w-full">
                             <ViewTransition name={`project-${project.slug}`} share="morph">
@@ -455,10 +412,7 @@ export function ProjectView({ project }: { project: Project }) {
                                 </div>
                             </ViewTransition>
 
-                            {/* Hero copy. `vt-hero-copy` applies view-transition-name:
-                                hero-copy at lg and up (see globals.css), making it its own
-                                group so it fades + rises in / fades out. Unnamed on mobile,
-                                where the split-out group doesn't survive the trip. */}
+                            {/* Hero copy `vt-hero-copy` */}
                             <div className="vt-hero-copy absolute inset-x-0 bottom-0 z-10 mx-auto w-full max-w-5xl px-6 pb-16 sm:px-8">
                                 <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">{project.name}</h1>
                                 <p className="mt-3 max-w-2xl text-lg text-gray-200">{project.blurb}</p>
@@ -469,7 +423,7 @@ export function ProjectView({ project }: { project: Project }) {
                                                 <a href={l.href} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-300 hover:text-blue-200 hover:underline">
                                                     {l.label} ↗
                                                 </a>
-                                                {/* Only surfaces below lg, where the tool doesn't work. */}
+                                                {/* only surfaces below lg, where the tool doesn't work. */}
                                                 {l.desktopOnly ? (
                                                     <span
                                                         title="This interactive tool is built for desktop and may not work on mobile."

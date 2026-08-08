@@ -30,58 +30,20 @@ body {
  * View Transitions — carousel thumbnail → project hero choreography
  * -----------------------------------------------------------------
  * Requires `experimental.viewTransition: true` in next.config.
- *
- * Each animated element carries its own view-transition-name, so it's
- * captured as its own group and animated here BY NAME. Without a name it
- * folds into the page-level snapshot and rides along with that instead.
- *
- * Desktop timeline (home → project):
- *   0ms    image morphs up from the thumbnail into the framed hero
- *   0ms    section nav slides in from the left rail
- *   460ms  hero copy fades + rises in (after the image has settled)
- *   500ms  ambient backdrop fades in (after the morph, always behind the image)
- *
- * MOBILE: only the morph and the backdrop are choreographed. Below lg the nav
- * and hero copy are never named at all — see the block right below. React's
- * experimental ViewTransition doesn't reliably emit the matching `-old` groups
- * on real handsets (it does under desktop device emulation, which makes this
- * easy to miss), and half a pair is worse than none: the element sits at full
- * opacity and then pops. Left unnamed, those elements are captured inside the
- * page-level snapshot and move as one piece with it — which on entry means they
- * simply appear, immediately, which is what you want under a morph anyway.
  * ================================================================= */
 
-/* Named groups.
-   Every one of these names is declared HERE, in CSS, on the element itself —
-   never inherited from an ancestor. That's the whole design, and it's the one
-   thing that has been reliable on mobile: the backdrop worked from the start
-   precisely because its name is a plain CSS declaration on its own element,
-   while everything that leaned on React's <ViewTransition> wrapper to be
-   captured never was, and so was never hidden or animated.
-
-   The wrapper has exactly four children — backdrop, close button, nav, and the
-   section scroller — so naming all four leaves nothing depending on the wrapper
-   at all. Whatever React does or doesn't do with its own name, every visible
-   piece of the page is its own group.
-
-   The morph is the exception, and stays React's: an explicit `name` prop, which
-   works everywhere. */
+/* named groups */
 .vt-backdrop    { view-transition-name: project-backdrop; }
 .vt-section-nav { view-transition-name: section-nav; }
 .vt-close       { view-transition-name: project-close; }
 @media (max-width: 1023px) {
-    /* The scroller carries all the body copy (and, below lg, the hero copy too —
-       .vt-hero-copy is only named at lg, so on mobile it's inside this snapshot
-       rather than its own group). Left unnamed above lg so the desktop path,
-       which works, is untouched. */
     .vt-page-body { view-transition-name: project-body; }
 }
 @media (min-width: 1024px) {
     .vt-hero-copy { view-transition-name: hero-copy; }
 }
 
-/* (1) Shared image morph. `.morph` comes from share="morph" on both the
-   thumbnail (ProjectCarousel) and the hero image (ProjectView). */
+/* (1) shared image morph */
 ::view-transition-group(.morph) {
     animation-duration: 500ms;
     animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
@@ -93,15 +55,7 @@ body {
     40% { filter: blur(2px); }
 }
 
-/* (0) Ambient backdrop — every size.
-   z-index keeps its snapshot BEHIND the morphing image for the whole transition.
-   Enter: held hidden through the 500ms morph, then fades in (so it never flashes
-          on top of the image).
-   Exit:  desktop cuts it at once, which reads as intentional next to the nav
-          sliding off to the left. On mobile there's no such choreography — the
-          nav, close button and body all just fade out with the morph on the UA's
-          default — so an instant cut made the backdrop the odd one out. Below lg
-          it's left unstyled and fades with everything else. */
+/* (0) ambient backdrop */
 ::view-transition-group(project-backdrop) { z-index: -1; }
 ::view-transition-new(project-backdrop) { animation: 420ms ease-out 500ms both vt-backdrop-in; }
 @media (min-width: 1024px) {
@@ -109,18 +63,13 @@ body {
 }
 @keyframes vt-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
 
-/* (2)–(3) below only ever match at lg and up, since that's the only place those
-   names are applied. Kept inside the same media query as the names so the two
-   can't drift apart. */
+/* only ever match at lg and up */
 @media (min-width: 1024px) {
-    /* (2) Hero copy — fades + rises in after the image settles; fades out on return. */
+    /* (2) hero copy */
     ::view-transition-new(hero-copy) { animation: 360ms ease-out 460ms both vt-copy-in; }
     ::view-transition-old(hero-copy) { animation: 240ms ease-in both vt-copy-out; }
 
-    /* (3) Section nav — starts WITH the morph (no delay); leaves the same way.
-       Slides in from the left rail. (There's no mobile counterpart any more: the
-       bottom bar is the twin of home's contact bar, so sliding an identical bar
-       out and back in read as jitter rather than movement.) */
+    /* (3) section nav */
     ::view-transition-new(section-nav) { animation: 420ms cubic-bezier(0.33, 1, 0.68, 1) both vt-nav-in-left; }
     ::view-transition-old(section-nav) { animation: 300ms cubic-bezier(0.4, 0, 1, 1) both vt-nav-out-left; }
 }
@@ -128,13 +77,9 @@ body {
 @keyframes vt-copy-out { from { opacity: 1; transform: translateY(0); }    to { opacity: 0; transform: translateY(10px); } }
 @keyframes vt-nav-in-left  { from { opacity: 0; transform: translateX(-100%); } to { opacity: 1; transform: translateX(0); } }
 @keyframes vt-nav-out-left { from { opacity: 1; transform: translateX(0); }     to { opacity: 0; transform: translateX(-100%); } }
-
-/* Held hidden for a tick = the snapshot vanishes instantly instead of lingering. */
 @keyframes vt-hold-hidden { from, to { opacity: 0; } }
 
-/* Reduced motion: skip movement, let content swap instantly.
-   Class-gated so the settings toggle stays authoritative (an explicit
-   "Full" choice wins even on a reduce-motion OS). */
+/* reduced motion */
 .reduce-motion::view-transition-group(*),
 .reduce-motion::view-transition-old(*),
 .reduce-motion::view-transition-new(*) {
@@ -142,27 +87,22 @@ body {
     animation-delay: 0s !important;
 }
 
-/* Accent flourishes */
+/* accent flourishes */
 ::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* Project-page ambient wash */
+/* project-page ambient wash */
 @keyframes backdrop-drift {
     from { transform: translate3d(0, 0, 0) scale(1); }
     to   { transform: translate3d(3%, -3%, 0) scale(1.12); }
 }
 
-/* Carousel greeting roll-in.
-   Each item starts clustered at the LEFT edge of the carousel and slides right
-   into its slot. The start offset is different for every item (a far-right item
-   travels the whole width), so it can't be a fixed value — ProjectCarousel
-   measures each item's resting position and writes it to --roll-from. This
-   keyframe is a PURE slide; the section wrapper (page.tsx) supplies the fade. */
+/* carousel greeting roll-in */
 @keyframes carousel-roll-in {
     from { transform: translateX(var(--roll-from, -60px)); }
     to   { transform: translateX(0); }
 }
-/* easeOutExpo — quick launch, long gentle deceleration into the slot. */
+/* easeOutExpo */
 .carousel-roll-in { animation: carousel-roll-in 1000ms cubic-bezier(0.3, 1, 0.6, 1) both; }
 .reduce-motion .carousel-roll-in { animation: none; }
 
@@ -172,9 +112,7 @@ body {
     to   { opacity: 1; transform: translate(-50%, 0) scale(1); }
 }
 
-/* Directional project↔project slide (whole page moves as one).
-   vw (not %) so every independent group travels the FULL viewport width in sync
-   — a % would move each group by only its own width, desyncing the left rail. */
+/* directional project slide */
 @keyframes vt-slide-out-left  { to   { transform: translateX(-100vw); } }
 @keyframes vt-slide-in-right  { from { transform: translateX(100vw); } }
 @keyframes vt-slide-out-right { to   { transform: translateX(100vw); } }
@@ -184,55 +122,18 @@ html[data-slide="next"]::view-transition-new(*) { animation: vt-slide-in-right  
 html[data-slide="prev"]::view-transition-old(*) { animation: vt-slide-out-right 340ms cubic-bezier(0.4,0,0.2,1) both !important; }
 html[data-slide="prev"]::view-transition-new(*) { animation: vt-slide-in-left   340ms cubic-bezier(0.4,0,0.2,1) both !important; }
 
-/* Page-level layers — one policy: appear instantly, leave on a fade.
-   NEW stays inert so the home→project morph is clean (the project appears
-   instantly behind the morphing image). OLD fades, so anything that lands here
-   instead of its own named group leaves WITH the reverse morph rather than
-   holding full opacity and popping after it.
-   `root` gets the identical treatment on purpose: it's the last-resort bucket for
-   any element whose group didn't materialise, which is the whole mobile story
-   here. Matching the two means the result no longer depends on which layer the
-   content ended up in.
-   The html[data-slide] rules above still override this (!important) for slides. */
-/* Page-level layers.
-   `.vt-page` NEW stays inert so the home→project morph is clean (the project
-   appears instantly behind the morphing image). OLD fades, so anything landing
-   here leaves WITH the reverse morph instead of popping after it.
-
-   root's NEW is deliberately NOT forced to `none`. Making the incoming page
-   appear instantly is what exposed home's backdrop-blur bars mid-composite —
-   you saw them arrive blurry and then resolve. The UA's default cross-fade
-   covers that frame, and root carries almost nothing on the project side
-   anyway now that all four children are named.
-
-   NOTE: written as separate rules, not one comma list. `.vt-page` is a
-   view-transition-CLASS selector, and an engine that doesn't support
-   view-transition-class treats it as invalid — which would drop the whole
-   comma-separated rule and take the `root` half with it. */
+/* page-level layers */
 ::view-transition-group(.vt-page) { animation: none; }
 ::view-transition-new(.vt-page)   { animation: none; }
 ::view-transition-old(.vt-page)   { animation: 260ms ease-in both vt-page-out; }
 ::view-transition-old(root)       { animation: 260ms ease-in both vt-page-out; }
 @keyframes vt-page-out { to { opacity: 0; } }
 
-/* Arriving on mobile: nav, close button and body are simply there, instantly,
-   behind the morphing image — which is how the unnamed version already behaved
-   and the part you liked. Without these they'd pick up the UA's default 250ms
-   fade-in now that they're real groups. Leaving is handled by the sweep below:
-   they're groups now, so `*` reaches them.
-   The backdrop is deliberately not in this list — it keeps its delayed fade-in. */
 @media (max-width: 1023px) {
     ::view-transition-new(section-nav)   { animation: none; }
     ::view-transition-new(project-close) { animation: none; }
     ::view-transition-new(project-body)  { animation: none; }
 }
 
-/* Entering a project: home leaves at once instead of fading.
-   On small screens home's contact bar and the project's section nav are twins
-   sitting in the same place, both translucent — so fading one out under the
-   other reads as a doubled bar rather than a hand-off. Nothing on the incoming
-   page is waiting for the outgoing one, so there's nothing to lose by cutting.
-   Tagged by markViewTransition("enter") on the way out of home (see lib/motion).
-   One-directional: exits are tagged separately (see below), so nothing here
-   fires on the way back. */
+/* entering a project: home leaves at once instead of fading */
 html[data-vt="enter"]::view-transition-old(root) { animation: 1ms linear both vt-hold-hidden; }
