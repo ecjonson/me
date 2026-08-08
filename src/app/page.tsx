@@ -288,9 +288,9 @@ export default function Home() {
 
             {/* Utilities — theme + replay. Top-right on every viewport. */}
             <div
-                className={`fixed right-0 top-0 z-40 flex items-center p-4 text-2xl text-gray-600 transition-opacity duration-700 [&_button]:cursor-pointer dark:text-gray-400 lg:p-6 ${
-                    revealed ? "opacity-100" : "opacity-0 pointer-events-none"
-                }`}
+                className={`fixed right-0 top-0 z-40 flex items-center p-4 text-2xl text-gray-600 [&_button]:cursor-pointer dark:text-gray-400 lg:p-6 ${
+                    started ? "transition-opacity duration-700" : ""
+                } ${revealed ? "opacity-100" : "opacity-0 pointer-events-none"}`}
             >
                 <SettingsMenu onReplay={replayGreeting} />
             </div>
@@ -300,10 +300,9 @@ export default function Home() {
                 the icons. Desktop uses the in-flow section above (no separator there). */}
             <nav
                 aria-label="Contact and links"
-                // className={`fixed inset-x-0 bottom-0 z-40 flex items-center justify-center gap-3 border-t border-gray-200/70 bg-white lg:bg-white/80 lg:backdrop-blur-sm p-4 text-2xl text-gray-600 transition-opacity duration-700 dark:border-gray-800/70 dark:bg-gray-950 lg:dark:bg-gray-950/60 dark:text-gray-400 lg:hidden ${
-                className={`fixed inset-x-0 bottom-0 z-40 flex items-center justify-center gap-3 border-t border-gray-200/70 bg-white/80 backdrop-blur-sm will-change-[backdrop-filter] p-4 text-2xl text-gray-600 transition-opacity duration-700 dark:border-gray-800/70 dark:bg-gray-950/60 dark:text-gray-400 lg:hidden ${
-                    revealed ? "opacity-100" : "opacity-0 pointer-events-none"
-                }`}
+                className={`fixed inset-x-0 bottom-0 z-40 flex items-center justify-center gap-3 border-t border-gray-200/70 bg-white/80 backdrop-blur-sm p-4 text-2xl text-gray-600 dark:border-gray-800/70 dark:bg-gray-950/60 dark:text-gray-400 lg:hidden ${
+                    started ? "transition-opacity duration-700" : ""
+                } ${revealed ? "opacity-100" : "opacity-0 pointer-events-none"}`}
             >
                 <span className="whitespace-nowrap text-sm font-medium text-gray-500 dark:text-gray-400">Get in touch</span>
                 <span aria-hidden="true" className="h-6 w-px bg-gray-300 dark:bg-gray-700" />
