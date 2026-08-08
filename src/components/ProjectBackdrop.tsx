@@ -4,26 +4,21 @@ import { useMemo, type CSSProperties } from "react";
 
 type Variant = "grid" | "dots" | "lines" | "glow" | "frame";
 
-// Variants eligible for the per-project random pick (frame is opt-in only).
+// variants eligible for the per-project random pick (frame is opt-in only).
 const RANDOM_VARIANTS: Variant[] = ["grid", "dots", "lines", "glow"];
 
-// Cheap deterministic hash → drives both the random variant and the glow spots.
+// cheap deterministic hash
 function hash(s: string) {
     let h = 0;
     for (let i = 0; i < s.length; i++) h = (Math.imul(h, 31) + s.charCodeAt(i)) | 0;
     return Math.abs(h);
 }
 
-// Center-weighted fade so patterns look intentional (denser toward the middle,
-// dissolving before the edges) rather than like tiled wallpaper.
+// center-weighted fade so patterns look intentional
 const MASK = "radial-gradient(ellipse 85% 75% at 50% 40%, #000 30%, transparent 82%)";
 const mix = (pct: number) => `color-mix(in srgb, var(--accent) ${pct}%, transparent)`;
 
-// A faint, accent-tinted layer behind the page.
-//   grid  — accent graph-paper           dots  — accent dot-grid
-//   lines — fine diagonal hairlines       glow  — soft drifting radial (per project)
-//   frame — a thin inset accent border (gallery mat)
-// Omit `variant` to get a stable, seed-picked one per project.
+// a faint, accent-tinted layer behind the page
 export function ProjectBackdrop({ seed, variant }: { seed: string; variant?: Variant }) {
     const { resolved, spots } = useMemo(() => {
         const h = hash(seed);
@@ -36,13 +31,12 @@ export function ProjectBackdrop({ seed, variant }: { seed: string; variant?: Var
         };
     }, [seed, variant]);
 
-    // Framing variant is a border, not a background layer.
+    // framing variant is a border, not a background layer
     if (resolved === "frame") {
         return (
             <div
                 aria-hidden="true"
-                style={{ viewTransitionName: "project-backdrop" }}
-                className="pointer-events-none fixed inset-3 -z-10 rounded-3xl border border-accent/20 lg:inset-6"
+                className="vt-backdrop pointer-events-none fixed inset-3 -z-10 rounded-3xl border border-accent/20 lg:inset-6"
             />
         );
     }
@@ -85,8 +79,7 @@ export function ProjectBackdrop({ seed, variant }: { seed: string; variant?: Var
     return (
         <div
             aria-hidden="true"
-            style={{ viewTransitionName: "project-backdrop" }}
-            className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+            className="vt-backdrop pointer-events-none fixed inset-0 -z-10 overflow-hidden"
         >
             <div
                 className={`absolute inset-[-10%] ${drift ? "motion-safe:animate-[backdrop-drift_26s_ease-in-out_infinite_alternate]" : ""}`}

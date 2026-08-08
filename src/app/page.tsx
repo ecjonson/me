@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, type MouseEvent } from "react";
 import { FaEnvelope, FaLinkedinIn, FaGithub, FaFileLines, FaChessKnight, FaEnvelopeCircleCheck, FaPaperPlane } from "react-icons/fa6";
-import { isReducedMotion } from "@/lib/motion";
+import { isReducedMotion, markViewTransition } from "@/lib/motion";
 import { SettingsMenu } from "@/components/SettingsMenu";
 import { ProjectCarousel } from "@/components/ProjectCarousel";
 import styles from "./page.module.css";
@@ -20,7 +20,7 @@ const YEAR = new Date().getFullYear();
 const TRACKER = `It's ${YEAR}! I'm at ${CURRENT_PROJECT.company} building ${CURRENT_PROJECT.name}.`
 const FULL = `${GREETING}\n${TAGLINE}\n${TRACKER}`;
 
-// Typing rhythm (ms)
+// typing rhythm (ms)
 const START_DELAY = 300;
 const CHAR_DELAY = 25;
 const CHAR_RANDOMNESS = 35;
@@ -36,19 +36,19 @@ function Cursor() {
 const linkCls = "inline-flex items-center gap-2 transition-colors hover:text-[var(--accent)]";
 const EMAIL = "evancjonson@gmail.com";
 
-// Email is a two-step link: copy to clipboard, then mailto
+// email is a three-step link: copy to clipboard, then mailto, and reset
 function EmailLink({ showLabel = false }: { showLabel?: boolean }) {
     const [primed, setPrimed] = useState(false);
     const [copied, setCopied] = useState(false);
 
-    // Hide the bubble ~1.8s after it appears.
+    // hide the bubble ~1.8s after it appears.
     useEffect(() => {
         if (!copied) return;
         const t = setTimeout(() => setCopied(false), 1200);
         return () => clearTimeout(t);
     }, [copied]);
 
-    // Revert mail-app mode back to copy after a few idle seconds.
+    // revert mail-app mode back to copy after a few idle seconds.
     useEffect(() => {
         if (!primed) return;
         const t = setTimeout(() => setPrimed(false), 6000);
@@ -56,7 +56,7 @@ function EmailLink({ showLabel = false }: { showLabel?: boolean }) {
     }, [primed]);
 
     const onClick = (e: MouseEvent<HTMLAnchorElement>) => {
-        if (primed) return; // second click within the window → let the mailto open
+        if (primed) return; // second click within the window, let the mailto open
         e.preventDefault();
         const clipboard = navigator.clipboard;
         if (clipboard?.writeText) {
@@ -91,8 +91,7 @@ function EmailLink({ showLabel = false }: { showLabel?: boolean }) {
     );
 }
 
-// Shared contact/profile links — icon-only in the mobile bottom bar, icon + label
-// in the desktop in-flow section (showLabels). Kept in one place so both stay in sync.
+// shared contact/profile links
 function ContactLinks({ showLabels = false }: { showLabels?: boolean }) {
     return (
         <>
@@ -124,7 +123,6 @@ function delayAfter(char: string) {
 }
 
 export default function Home() {
-    // const alreadyGreeted = typeof window !== "undefined" && !!sessionStorage.getItem("greeted");
     const [typed, setTyped] = useState(0);
     const [started, setStarted] = useState(false);
     const [revealed, setRevealed] = useState(false);
@@ -156,7 +154,7 @@ export default function Home() {
             }
             setTyped(i + 1);
 
-            // Greeting, pause, then pan the page in and resume typing.
+            // greeting, pause, then pan the page in and resume typing
             if (i + 1 === GREETING.length) {
                 timer = setTimeout(() => {
                     setRevealed(true);
@@ -206,7 +204,7 @@ export default function Home() {
     const onTagline = lines.length >= 2;
     const onTracker = lines.length >= 3;
     
-    // Render line3 with the project name as a live link once its text appears
+    // render line3 with the project name as a live link once its text appears
     const beforeCompany = TRACKER.slice(0, TRACKER.indexOf(CURRENT_PROJECT.company));
     const beforeLink = TRACKER.slice(0, TRACKER.indexOf(CURRENT_PROJECT.name));
     const typedIntoLink  = line3.length > beforeLink.length;
@@ -219,7 +217,7 @@ export default function Home() {
 
     return (
         <main className="mx-auto flex min-h-dvh max-w-2xl flex-col px-6 sm:px-8 lg:max-w-5xl">
-            {/* Greeting hero — stays on the page, then pans out to reveal the rest */}
+            {/* greeting hero — stays on the page, then pans out to reveal the rest */}
             <section className="flex flex-col pt-16 pb-12 sm:pt-20 min-h-[40vh]">
                 <div
                     className={`origin-top-left ${
@@ -248,7 +246,7 @@ export default function Home() {
                             {typedIntoLink && (
                                 <Link
                                     href={CURRENT_PROJECT.href}
-                                    // className="text-blue-600 hover:underline dark:text-blue-400"
+                                    onClick={() => markViewTransition("enter")}
                                     className="text-accent hover:underline"
                                 >
                                     {linkTextTyped}
@@ -262,9 +260,7 @@ export default function Home() {
                     )}
                 </div>
             </section>
-            {/* The rest of the page, revealed as the hero pans out. On mobile it floats
-                to the bottom (mt-auto) for breathing room under the greeting; on desktop
-                it sits right below the hero, with the links in-flow beneath the projects. */}
+            {/* the rest of the page, revealed as the hero pans out. */}
             <div
                 className={`mt-auto pb-28 lg:mt-0 lg:pb-20 ${
                     started ? "transition-opacity delay-300 duration-700 ease-out" : ""
@@ -274,8 +270,7 @@ export default function Home() {
                     <ProjectCarousel intro={started && revealed} />
                 </section>
 
-                {/* Links — desktop only, in-flow below the projects with a bit of context.
-                    Mobile shows the fixed bottom bar version instead. */}
+                {/* links — desktop only */}
                 <section className="mt-16 hidden lg:block">
                     <h2 className="text-sm font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
                         Get in touch
@@ -286,23 +281,21 @@ export default function Home() {
                 </section>
             </div>
 
-            {/* Utilities — theme + replay. Top-right on every viewport. */}
+            {/* utilities */}
             <div
-                className={`fixed right-0 top-0 z-40 flex items-center p-4 text-2xl text-gray-600 transition-opacity duration-700 [&_button]:cursor-pointer dark:text-gray-400 lg:p-6 ${
-                    revealed ? "opacity-100" : "opacity-0 pointer-events-none"
-                }`}
+                className={`fixed right-0 top-0 z-40 flex items-center p-4 text-2xl text-gray-600 [&_button]:cursor-pointer dark:text-gray-400 lg:p-6 ${
+                    started ? "transition-opacity duration-700" : ""
+                } ${revealed ? "opacity-100" : "opacity-0 pointer-events-none"}`}
             >
                 <SettingsMenu onReplay={replayGreeting} />
             </div>
             
-            {/* Contact links — mobile bottom bar. Frosted + top border to match the
-                project nav, with a "Get in touch" label and a hairline divider before
-                the icons. Desktop uses the in-flow section above (no separator there). */}
+            {/* contact links */}
             <nav
                 aria-label="Contact and links"
-                className={`fixed inset-x-0 bottom-0 z-40 flex items-center justify-center gap-3 border-t border-gray-200/70 bg-white/80 p-4 text-2xl text-gray-600 backdrop-blur-sm transition-opacity duration-700 dark:border-gray-800/70 dark:bg-gray-950/60 dark:text-gray-400 lg:hidden ${
-                    revealed ? "opacity-100" : "opacity-0 pointer-events-none"
-                }`}
+                className={`fixed inset-x-0 bottom-0 z-40 flex items-center justify-center gap-3 border-t border-gray-200/70 bg-white/80 backdrop-blur-sm p-4 text-2xl text-gray-600 dark:border-gray-800/70 dark:bg-gray-950/60 dark:text-gray-400 lg:hidden ${
+                    started ? "transition-opacity duration-700" : ""
+                } ${revealed ? "opacity-100" : "opacity-0 pointer-events-none"}`}
             >
                 <span className="whitespace-nowrap text-sm font-medium text-gray-500 dark:text-gray-400">Get in touch</span>
                 <span aria-hidden="true" className="h-6 w-px bg-gray-300 dark:bg-gray-700" />

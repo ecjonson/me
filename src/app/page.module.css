@@ -13,12 +13,11 @@
     50%, 100% { opacity: 0; }
 }
 
-/* Own colours, following the dark class (incl. custom-bg luminance) — not the accent. */
 :global(.dark) .cursor {
     color: #50fa7b;
 }
 
-/* Steady the caret when motion is reduced. */
+/* steady the caret when motion is reduced. */
 :global(.reduce-motion) .cursor {
     animation: none;
     opacity: 1;
