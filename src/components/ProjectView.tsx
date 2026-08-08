@@ -302,7 +302,7 @@ export function ProjectView({ project }: { project: Project }) {
 
     return (
         <ViewTransition default="vt-page">
-            <div className="vt-page-root relative">
+            <div className="relative">
                 {/* Ambient backdrop. Carries `vt-backdrop`, which names it project-backdrop
                     at every size (see globals.css) — its own group is what keeps the wash
                     behind the morphing image, and it fades in on arrival only. */}
@@ -315,7 +315,7 @@ export function ProjectView({ project }: { project: Project }) {
                     href="/"
                     aria-label="Close"
                     onClick={leaveHome}
-                    className="fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-lg leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:hidden dark:bg-gray-800/90 dark:text-gray-300"
+                    className="vt-close fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-lg leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:hidden dark:bg-gray-800/90 dark:text-gray-300"
                 >
                     ×
                 </Link>
@@ -445,7 +445,7 @@ export function ProjectView({ project }: { project: Project }) {
                 </nav>
 
                 {/* Vertical snap scroller */}
-                <div ref={scrollerRef} className="h-dvh snap-y snap-mandatory overflow-y-scroll scroll-smooth">
+                <div ref={scrollerRef} className="vt-page-body h-dvh snap-y snap-mandatory overflow-y-scroll scroll-smooth">
                     {/* Hero — fullscreen framed image; the image is the morph target and
                         the copy fades in after. */}
                     <section id="hero" className={`relative h-dvh snap-start ${SECTION_FRAME}`}>

@@ -52,22 +52,32 @@ body {
  * ================================================================= */
 
 /* Named groups.
-   The names live here rather than in inline styles precisely so they can be
-   media-queried; the components just carry the class (ProjectView, ProjectBackdrop).
+   Every one of these names is declared HERE, in CSS, on the element itself —
+   never inherited from an ancestor. That's the whole design, and it's the one
+   thing that has been reliable on mobile: the backdrop worked from the start
+   precisely because its name is a plain CSS declaration on its own element,
+   while everything that leaned on React's <ViewTransition> wrapper to be
+   captured never was, and so was never hidden or animated.
 
-   The backdrop is named at EVERY size, unlike the nav and copy. Two reasons:
-   its exit is an instant hide, so a missing `-old` group on mobile is
-   indistinguishable from the intended result — there's nothing left to break;
-   and having its own group is the only way to keep it off the page snapshot,
-   which is painted ABOVE the morph (new-only groups get appended last) and so
-   flashes the wash over the hero image for a frame or two.
+   The wrapper has exactly four children — backdrop, close button, nav, and the
+   section scroller — so naming all four leaves nothing depending on the wrapper
+   at all. Whatever React does or doesn't do with its own name, every visible
+   piece of the page is its own group.
 
-   The morph isn't here at all — it's the one group that survives everywhere,
-   and it keeps its React-assigned name at every size. */
-.vt-backdrop { view-transition-name: project-backdrop; }
+   The morph is the exception, and stays React's: an explicit `name` prop, which
+   works everywhere. */
+.vt-backdrop    { view-transition-name: project-backdrop; }
+.vt-section-nav { view-transition-name: section-nav; }
+.vt-close       { view-transition-name: project-close; }
+@media (max-width: 1023px) {
+    /* The scroller carries all the body copy (and, below lg, the hero copy too —
+       .vt-hero-copy is only named at lg, so on mobile it's inside this snapshot
+       rather than its own group). Left unnamed above lg so the desktop path,
+       which works, is untouched. */
+    .vt-page-body { view-transition-name: project-body; }
+}
 @media (min-width: 1024px) {
-    .vt-section-nav { view-transition-name: section-nav; }
-    .vt-hero-copy   { view-transition-name: hero-copy; }
+    .vt-hero-copy { view-transition-name: hero-copy; }
 }
 
 /* (1) Shared image morph. `.morph` comes from share="morph" on both the
@@ -192,37 +202,17 @@ html[data-slide="prev"]::view-transition-new(*) { animation: vt-slide-in-left   
 ::view-transition-old(root)       { animation: 260ms ease-in both vt-page-out; }
 @keyframes vt-page-out { to { opacity: 0; } }
 
-/* Our own name for the page wrapper, mobile only.
-   THIS is what was leaving the nav, close button and body text on screen through
-   the whole morph. They have no name of their own below lg, so they're only
-   captured if an ANCESTOR is named — and the only named ancestor is React's
-   <ViewTransition default="vt-page"> wrapper, whose name never lands on the old
-   side here. Uncaptured means unsnapshotted, which means the browser never
-   hides them: what you were watching wasn't a stuck snapshot, it was the live
-   project page still sitting there until React unmounted it at the end. (The
-   backdrop escaped this because its name comes from CSS, not React — same
-   reason this fixes the rest.)
-
-   Applied only while <html data-vt> is set, i.e. only for the duration of a
-   navigation. A permanent view-transition-name would make the wrapper a
-   containing block for its fixed children at rest, and there's no reason to
-   carry that around between transitions.
-
-   Above lg this stays off and React's wrapper keeps doing the job, since that
-   path demonstrably works there. */
+/* Arriving on mobile: nav, close button and body are simply there, instantly,
+   behind the morphing image — which is how the unnamed version already behaved
+   and the part you liked. Without these they'd pick up the UA's default 250ms
+   fade-in now that they're real groups. Leaving is handled by the sweep below:
+   they're groups now, so `*` reaches them.
+   The backdrop is deliberately not in this list — it keeps its delayed fade-in. */
 @media (max-width: 1023px) {
-    /* !important because React's <ViewTransition> manages view-transition-name as
-       an INLINE style on its child — which is this exact element. An inline
-       declaration beats a stylesheet one, so without !important our name loses
-       to whatever React last wrote there (including `none`). Note the one name
-       in this file that has always worked on mobile is the backdrop's, and the
-       backdrop is the one named element React doesn't wrap. */
-    html[data-vt] .vt-page-root { view-transition-name: project-page !important; }
+    ::view-transition-new(section-nav)   { animation: none; }
+    ::view-transition-new(project-close) { animation: none; }
+    ::view-transition-new(project-body)  { animation: none; }
 }
-/* Arriving: the page is simply there, instantly, behind the morphing image —
-   matching what the unnamed version already did well. Leaving is handled by the
-   exit rule below, which fades it out with the morph. */
-::view-transition-new(project-page) { animation: none; }
 
 /* Entering a project: home leaves at once instead of fading.
    On small screens home's contact bar and the project's section nav are twins
