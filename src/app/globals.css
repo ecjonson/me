@@ -97,11 +97,16 @@ body {
    z-index keeps its snapshot BEHIND the morphing image for the whole transition.
    Enter: held hidden through the 500ms morph, then fades in (so it never flashes
           on top of the image).
-   Exit:  disappears at once as the reverse morph starts — no lingering fade, and
-          nothing for a missing `-old` group to get wrong. */
+   Exit:  desktop cuts it at once, which reads as intentional next to the nav
+          sliding off to the left. On mobile there's no such choreography — the
+          nav, close button and body all just fade out with the morph on the UA's
+          default — so an instant cut made the backdrop the odd one out. Below lg
+          it's left unstyled and fades with everything else. */
 ::view-transition-group(project-backdrop) { z-index: -1; }
 ::view-transition-new(project-backdrop) { animation: 420ms ease-out 500ms both vt-backdrop-in; }
-::view-transition-old(project-backdrop) { animation: 1ms linear both vt-hold-hidden; }
+@media (min-width: 1024px) {
+    ::view-transition-old(project-backdrop) { animation: 1ms linear both vt-hold-hidden; }
+}
 @keyframes vt-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
 
 /* (2)–(3) below only ever match at lg and up, since that's the only place those

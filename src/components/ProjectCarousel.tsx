@@ -12,6 +12,8 @@ import { markViewTransition } from "@/lib/motion";
 // STEP spaces the items out; oldest (rightmost) fires first.
 const ROLL_BASE = 1000;
 const ROLL_STEP = 80;
+// Must match the animation-duration of .carousel-roll-in in globals.css.
+const ROLL_DURATION = 1000;
 
 // How far off the LEFT edge items wait before sliding in. Keeps the "stacked"
 // phase hidden off-screen, so you only see them roll in — not pile up first.
@@ -84,7 +86,25 @@ export function ProjectCarousel({ intro = false }: { intro?: boolean }) {
             // to the slot — so the stacked phase is hidden and only the roll shows.
             el.style.setProperty("--roll-from", `${-(home + ROLL_OFFSCREEN)}px`);
         });
-    }, [intro]);
+
+        // Hold the strip inert until every item has landed. The sweep runs
+        // oldest → newest, so the NEWEST project is the last to arrive — still
+        // sliding a couple of seconds after the greeting ends, which is exactly
+        // when it's the obvious thing to reach for. Tapping a moving target means
+        // the item has travelled on by the time the tap resolves and you open its
+        // neighbour instead; a tap that does nothing is the better failure.
+        // Written straight to the node rather than held in state: it's a property
+        // no render depends on, and setting it here means the strip is already
+        // inert in the first painted frame.
+        list.style.pointerEvents = "none";
+        // +40 matches the year marker's extra offset — it lands last of all.
+        const settled = ROLL_BASE + last * ROLL_STEP + 40 + ROLL_DURATION;
+        const t = setTimeout(() => { list.style.pointerEvents = ""; }, settled);
+        return () => {
+            clearTimeout(t);
+            list.style.pointerEvents = "";
+        };
+    }, [intro, last]);
 
     return (
         <ul ref={listRef} className="relative flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:thin]">
@@ -116,7 +136,7 @@ export function ProjectCarousel({ intro = false }: { intro?: boolean }) {
                                             src={image}
                                             alt={alt}
                                             fill
-                                            priority={i === last}
+                                            priority={i === 0}
                                             sizes="160px"
                                             className="object-cover transition-transform duration-300 ease-out group-hover:scale-110 group-active:scale-110"
                                         />
