@@ -189,15 +189,23 @@ html[data-slide="prev"]::view-transition-new(*) { animation: vt-slide-in-left   
    here. Matching the two means the result no longer depends on which layer the
    content ended up in.
    The html[data-slide] rules above still override this (!important) for slides. */
-/* NOTE: deliberately five rules, not two comma-joined ones. `.vt-page` is a
-   view-transition-CLASS selector, and if an engine doesn't support
-   view-transition-class it treats that selector as invalid — which drops the
-   ENTIRE comma-separated rule, taking the `root` half down with it. Written
-   separately, the name-based rules survive on their own. Same reason the
-   `.morph` rules above are standalone. */
+/* Page-level layers.
+   `.vt-page` NEW stays inert so the home→project morph is clean (the project
+   appears instantly behind the morphing image). OLD fades, so anything landing
+   here leaves WITH the reverse morph instead of popping after it.
+
+   root's NEW is deliberately NOT forced to `none`. Making the incoming page
+   appear instantly is what exposed home's backdrop-blur bars mid-composite —
+   you saw them arrive blurry and then resolve. The UA's default cross-fade
+   covers that frame, and root carries almost nothing on the project side
+   anyway now that all four children are named.
+
+   NOTE: written as separate rules, not one comma list. `.vt-page` is a
+   view-transition-CLASS selector, and an engine that doesn't support
+   view-transition-class treats it as invalid — which would drop the whole
+   comma-separated rule and take the `root` half with it. */
 ::view-transition-group(.vt-page) { animation: none; }
 ::view-transition-new(.vt-page)   { animation: none; }
-::view-transition-new(root)       { animation: none; }
 ::view-transition-old(.vt-page)   { animation: 260ms ease-in both vt-page-out; }
 ::view-transition-old(root)       { animation: 260ms ease-in both vt-page-out; }
 @keyframes vt-page-out { to { opacity: 0; } }
@@ -214,36 +222,6 @@ html[data-slide="prev"]::view-transition-new(*) { animation: vt-slide-in-left   
     ::view-transition-new(project-body)  { animation: none; }
 }
 
-/* Post-transition sink — mobile, leaving a project.
-   You asked what's different about the backdrop: it's -z-10. That's the whole
-   answer, and it also identifies the flash.
-
-   When a transition ends the browser destroys the snapshots and un-hides the
-   real elements. React keeps the outgoing page mounted a beat longer than that,
-   so for a frame or two BOTH pages are in the DOM — and the project page wins
-   the paint, because its close button is z-50, its nav is z-40 and its scroller
-   is in normal flow, all of which sit above home's content. The backdrop is the
-   one piece that never flashed because at -z-10 it was already painting behind
-   home. It wasn't behaving differently; it was just hidden by stacking.
-
-   So put the whole outgoing page where the backdrop already was. z-index on the
-   wrapper makes it a stacking context, which pulls every descendant — z-50
-   close button included — behind home with it. Opacity goes along as a belt.
-
-   Animated with a delay rather than applied outright: the old snapshots are
-   taken the instant startViewTransition runs, and re-stacking the tree before
-   that could reorder the capture. 80ms clears it, `forwards` holds it, and no
-   backwards fill means nothing moves early. While the transition is running
-   these elements aren't painted anyway, so sinking them early costs nothing. */
-@keyframes vt-post-exit-sink { to { opacity: 0; z-index: -1; } }
-@media (max-width: 1023px) {
-    html[data-vt="exit"] .vt-page-root {
-        animation: vt-post-exit-sink 1ms linear 80ms forwards;
-    }
-    /* Motion off means the swap is instant — no gap to paper over. */
-    .reduce-motion[data-vt="exit"] .vt-page-root { animation: none; }
-}
-
 /* Entering a project: home leaves at once instead of fading.
    On small screens home's contact bar and the project's section nav are twins
    sitting in the same place, both translucent — so fading one out under the
@@ -253,19 +231,3 @@ html[data-slide="prev"]::view-transition-new(*) { animation: vt-slide-in-left   
    One-directional: exits are tagged separately (see below), so nothing here
    fires on the way back. */
 html[data-vt="enter"]::view-transition-old(root) { animation: 1ms linear both vt-hold-hidden; }
-
-/* Leaving a project on small screens: every old snapshot leaves WITH the morph.
-   Blunt on purpose. `*` catches whichever group each piece ended up in — the
-   page wrapper named just above, the backdrop's own group, root — without this
-   file having to enumerate them, and `!important` beats the UA default.
-   It's the same hammer the project↔project slide uses, which is the one exit
-   that has always behaved on mobile.
-
-   This also sweeps up the backdrop's instant hide on mobile, so on the way back
-   the wash fades out with everything else instead of blinking off first.
-   Desktop keeps the choreographed exit (nav slides left, copy fades, backdrop
-   cuts) — nothing above lg is touched.
-   data-slide still wins over this: it's the more specific selector. */
-@media (max-width: 1023px) {
-    html[data-vt="exit"]::view-transition-old(*) { animation: 240ms ease-in both vt-page-out !important; }
-}

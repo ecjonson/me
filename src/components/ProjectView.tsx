@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { ViewTransition, useEffect, useRef, useState } from "react";
 import { ProjectBackdrop } from "@/components/ProjectBackdrop";
 import { projects } from "@/lib/projects";
-import { isReducedMotion, markViewTransition } from "@/lib/motion";
+import { isReducedMotion } from "@/lib/motion";
 import type { Project, ProjectLink, ProjectSection } from "@/lib/projects";
 
 /**
@@ -206,11 +206,6 @@ export function ProjectView({ project }: { project: Project }) {
     // matching the back/× controls rather than browser history.
     const router = useRouter();
 
-    // Every route out of a project tags <html data-vt="exit"> so globals.css can
-    // treat leaving differently from arriving (CSS can't tell them apart — the
-    // old root snapshot is "home" one way and "this page" the other).
-    const leaveHome = () => markViewTransition("exit");
-
     // Warm "/" as soon as a project opens. Esc and the back gesture route via
     // router.push rather than a <Link>, so they get no prefetch of their own —
     // and if home isn't ready when the transition ends, the browser tears down
@@ -221,24 +216,12 @@ export function ProjectView({ project }: { project: Project }) {
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if (e.key === "Escape" && !e.defaultPrevented) {
-                leaveHome();
                 router.push("/");
             }
         };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
     }, [router]);
-
-    // History back — the browser button, Android's back gesture, iOS edge-swipe —
-    // never runs a click handler, so tag it here as well. Without this a gesture
-    // back falls through to the untagged default and the page pops instead of
-    // leaving with the morph. popstate fires before the router commits, so the
-    // attribute is in place by the time the transition captures.
-    useEffect(() => {
-        const onPop = () => markViewTransition("exit");
-        window.addEventListener("popstate", onPop);
-        return () => window.removeEventListener("popstate", onPop);
-    }, []);
 
     const slideDir = (dir: "next" | "prev") => () => {
         if (typeof document === "undefined" || isReducedMotion()) return;
@@ -309,7 +292,7 @@ export function ProjectView({ project }: { project: Project }) {
 
     return (
         <ViewTransition default="vt-page">
-            <div className="vt-page-root relative">
+            <div className="relative">
                 {/* Ambient backdrop. Carries `vt-backdrop`, which names it project-backdrop
                     at every size (see globals.css) — its own group is what keeps the wash
                     behind the morphing image, and it fades in on arrival only. */}
@@ -322,7 +305,6 @@ export function ProjectView({ project }: { project: Project }) {
                     href="/"
                     aria-label="Close"
                     prefetch
-                    onClick={leaveHome}
                     className="vt-close fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-lg leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:hidden dark:bg-gray-800/90 dark:text-gray-300"
                 >
                     ×
@@ -332,11 +314,11 @@ export function ProjectView({ project }: { project: Project }) {
                     Mobile: bottom bar with a back bubble pinned left + a left-aligned
                             label strip (active tab sits next to the back button).
                     Desktop (lg): left rail, same bubble aesthetic.
-                    `vt-section-nav` applies view-transition-name: section-nav — but only
-                    at lg and up (see globals.css). On mobile the bar deliberately has NO
-                    name: it's the twin of home's contact bar, so sliding one out while an
-                    identical one slides in just reads as jitter. Unnamed, it rides along
-                    inside the page snapshot instead. */}
+                    `vt-section-nav` applies view-transition-name: section-nav at every
+                    size (see globals.css), so the bar is captured as its own group. Only
+                    the desktop rail is choreographed, though — on mobile the bar is the
+                    twin of home's contact bar, and sliding one out while an identical one
+                    slides in just reads as jitter, so it arrives instantly instead. */}
                 <nav
                     ref={navRef}
                     aria-label="Sections"
@@ -351,7 +333,6 @@ export function ProjectView({ project }: { project: Project }) {
                         href="/"
                         title="Back to projects"
                         prefetch
-                        onClick={leaveHome}
                         className="absolute left-4 top-4 hidden h-9 items-center gap-1.5 rounded-full bg-gray-100/90 pl-2.5 pr-3.5 text-sm font-medium leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:inline-flex dark:bg-gray-800/90 dark:text-gray-300"
                     >
                         <span aria-hidden="true" className="text-lg leading-none">←</span>
@@ -393,7 +374,6 @@ export function ProjectView({ project }: { project: Project }) {
                             href="/"
                             aria-label="Back"
                             prefetch
-                            onClick={leaveHome}
                             className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-base text-gray-600 transition-colors hover:text-accent lg:hidden dark:bg-gray-800 dark:text-gray-300"
                         >
                             ←
