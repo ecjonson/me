@@ -309,7 +309,7 @@ export function ProjectView({ project }: { project: Project }) {
 
     return (
         <ViewTransition default="vt-page">
-            <div className="relative">
+            <div className="vt-page-root relative">
                 {/* Ambient backdrop. Carries `vt-backdrop`, which names it project-backdrop
                     at every size (see globals.css) — its own group is what keeps the wash
                     behind the morphing image, and it fades in on arrival only. */}
