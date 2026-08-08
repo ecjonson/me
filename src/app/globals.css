@@ -211,7 +211,13 @@ html[data-slide="prev"]::view-transition-new(*) { animation: vt-slide-in-left   
    Above lg this stays off and React's wrapper keeps doing the job, since that
    path demonstrably works there. */
 @media (max-width: 1023px) {
-    html[data-vt] .vt-page-root { view-transition-name: project-page; }
+    /* !important because React's <ViewTransition> manages view-transition-name as
+       an INLINE style on its child — which is this exact element. An inline
+       declaration beats a stylesheet one, so without !important our name loses
+       to whatever React last wrote there (including `none`). Note the one name
+       in this file that has always worked on mobile is the backdrop's, and the
+       backdrop is the one named element React doesn't wrap. */
+    html[data-vt] .vt-page-root { view-transition-name: project-page !important; }
 }
 /* Arriving: the page is simply there, instantly, behind the morphing image —
    matching what the unnamed version already did well. Leaving is handled by the
