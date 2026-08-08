@@ -211,6 +211,13 @@ export function ProjectView({ project }: { project: Project }) {
     // old root snapshot is "home" one way and "this page" the other).
     const leaveHome = () => markViewTransition("exit");
 
+    // Warm "/" as soon as a project opens. Esc and the back gesture route via
+    // router.push rather than a <Link>, so they get no prefetch of their own —
+    // and if home isn't ready when the transition ends, the browser tears down
+    // the snapshots before React has committed it, which shows up as the old
+    // page flashing back for a frame.
+    useEffect(() => { router.prefetch("/"); }, [router]);
+
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if (e.key === "Escape" && !e.defaultPrevented) {
@@ -314,6 +321,7 @@ export function ProjectView({ project }: { project: Project }) {
                 <Link
                     href="/"
                     aria-label="Close"
+                    prefetch
                     onClick={leaveHome}
                     className="vt-close fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-lg leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:hidden dark:bg-gray-800/90 dark:text-gray-300"
                 >
@@ -342,6 +350,7 @@ export function ProjectView({ project }: { project: Project }) {
                     <Link
                         href="/"
                         title="Back to projects"
+                        prefetch
                         onClick={leaveHome}
                         className="absolute left-4 top-4 hidden h-9 items-center gap-1.5 rounded-full bg-gray-100/90 pl-2.5 pr-3.5 text-sm font-medium leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:inline-flex dark:bg-gray-800/90 dark:text-gray-300"
                     >
@@ -383,6 +392,7 @@ export function ProjectView({ project }: { project: Project }) {
                         <Link
                             href="/"
                             aria-label="Back"
+                            prefetch
                             onClick={leaveHome}
                             className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-base text-gray-600 transition-colors hover:text-accent lg:hidden dark:bg-gray-800 dark:text-gray-300"
                         >

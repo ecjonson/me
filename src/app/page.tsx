@@ -300,7 +300,7 @@ export default function Home() {
                 the icons. Desktop uses the in-flow section above (no separator there). */}
             <nav
                 aria-label="Contact and links"
-                className={`fixed inset-x-0 bottom-0 z-40 flex items-center justify-center gap-3 border-t border-gray-200/70 bg-white/80 p-4 text-2xl text-gray-600 backdrop-blur-sm transition-opacity duration-700 dark:border-gray-800/70 dark:bg-gray-950/60 dark:text-gray-400 lg:hidden ${
+                className={`fixed inset-x-0 bottom-0 z-40 flex items-center justify-center gap-3 border-t border-gray-200/70 bg-white lg:bg-white/80 lg:backdrop-blur-sm p-4 text-2xl text-gray-600 transition-opacity duration-700 dark:border-gray-800/70 dark:bg-gray-950 lg:dark:bg-gray-950/60 dark:text-gray-400 lg:hidden ${
                     revealed ? "opacity-100" : "opacity-0 pointer-events-none"
                 }`}
             >
