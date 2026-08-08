@@ -192,6 +192,32 @@ html[data-slide="prev"]::view-transition-new(*) { animation: vt-slide-in-left   
 ::view-transition-old(root)       { animation: 260ms ease-in both vt-page-out; }
 @keyframes vt-page-out { to { opacity: 0; } }
 
+/* Our own name for the page wrapper, mobile only.
+   THIS is what was leaving the nav, close button and body text on screen through
+   the whole morph. They have no name of their own below lg, so they're only
+   captured if an ANCESTOR is named — and the only named ancestor is React's
+   <ViewTransition default="vt-page"> wrapper, whose name never lands on the old
+   side here. Uncaptured means unsnapshotted, which means the browser never
+   hides them: what you were watching wasn't a stuck snapshot, it was the live
+   project page still sitting there until React unmounted it at the end. (The
+   backdrop escaped this because its name comes from CSS, not React — same
+   reason this fixes the rest.)
+
+   Applied only while <html data-vt> is set, i.e. only for the duration of a
+   navigation. A permanent view-transition-name would make the wrapper a
+   containing block for its fixed children at rest, and there's no reason to
+   carry that around between transitions.
+
+   Above lg this stays off and React's wrapper keeps doing the job, since that
+   path demonstrably works there. */
+@media (max-width: 1023px) {
+    html[data-vt] .vt-page-root { view-transition-name: project-page; }
+}
+/* Arriving: the page is simply there, instantly, behind the morphing image —
+   matching what the unnamed version already did well. Leaving is handled by the
+   exit rule below, which fades it out with the morph. */
+::view-transition-new(project-page) { animation: none; }
+
 /* Entering a project: home leaves at once instead of fading.
    On small screens home's contact bar and the project's section nav are twins
    sitting in the same place, both translucent — so fading one out under the
@@ -203,14 +229,11 @@ html[data-slide="prev"]::view-transition-new(*) { animation: vt-slide-in-left   
 html[data-vt="enter"]::view-transition-old(root) { animation: 1ms linear both vt-hold-hidden; }
 
 /* Leaving a project on small screens: every old snapshot leaves WITH the morph.
-   This is the blunt version of the rule above it, and deliberately so. On mobile
-   we can't be sure which group the project's chrome ends up in — its own named
-   group, the React-named page wrapper, or root — and if it lands somewhere we
-   didn't style it holds at full opacity for the whole 500ms morph and then pops
-   out at the end. `*` doesn't care where it landed, and `!important` beats
-   whatever the UA or React would otherwise apply. It's the same hammer the
-   project↔project slide already uses, which is the one exit that behaves on
-   mobile today — the difference isn't the direction, it's the selector.
+   Blunt on purpose. `*` catches whichever group each piece ended up in — the
+   page wrapper named just above, the backdrop's own group, root — without this
+   file having to enumerate them, and `!important` beats the UA default.
+   It's the same hammer the project↔project slide uses, which is the one exit
+   that has always behaved on mobile.
 
    This also sweeps up the backdrop's instant hide on mobile, so on the way back
    the wash fades out with everything else instead of blinking off first.
