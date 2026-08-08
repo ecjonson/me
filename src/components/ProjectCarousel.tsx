@@ -87,21 +87,34 @@ export function ProjectCarousel({ intro = false }: { intro?: boolean }) {
             el.style.setProperty("--roll-from", `${-(home + ROLL_OFFSCREEN)}px`);
         });
 
-        // Hold the strip inert until every item has landed. The sweep runs
-        // oldest → newest, so the NEWEST project is the last to arrive — still
-        // sliding a couple of seconds after the greeting ends, which is exactly
-        // when it's the obvious thing to reach for. Tapping a moving target means
-        // the item has travelled on by the time the tap resolves and you open its
-        // neighbour instead; a tap that does nothing is the better failure.
-        // Written straight to the node rather than held in state: it's a property
-        // no render depends on, and setting it here means the strip is already
-        // inert in the first painted frame.
+        // Mandatory scroll snapping keeps the scrollport aligned to a snap area,
+        // and a snap area is the item's TRANSFORMED box — so during the roll-in
+        // every snap position in the strip is sliding. The container chases them,
+        // and once the items settle it's parked between snap points. Nothing looks
+        // wrong until you touch it: the first touch re-snaps, the strip lurches by
+        // an item at the exact moment you tap, and you open its neighbour.
+        //
+        // So suspend snapping for the duration and put the scroll back at the start
+        // when everything lands. Restoring to "" hands control back to the
+        // stylesheet's snap-x snap-mandatory rather than hard-coding it here.
+        //
+        // pointer-events covers the same window for a different reason — the newest
+        // project is the LAST to arrive, so it's still moving under your finger
+        // while the sweep finishes. A tap that does nothing is the better failure.
+        // Both are written straight to the node: no render depends on them, and
+        // setting them in a layout effect means they apply in the first painted frame.
+        list.style.scrollSnapType = "none";
         list.style.pointerEvents = "none";
         // +40 matches the year marker's extra offset — it lands last of all.
         const settled = ROLL_BASE + last * ROLL_STEP + 40 + ROLL_DURATION;
-        const t = setTimeout(() => { list.style.pointerEvents = ""; }, settled);
+        const t = setTimeout(() => {
+            list.scrollLeft = 0;
+            list.style.scrollSnapType = "";
+            list.style.pointerEvents = "";
+        }, settled);
         return () => {
             clearTimeout(t);
+            list.style.scrollSnapType = "";
             list.style.pointerEvents = "";
         };
     }, [intro, last]);
