@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState, type MouseEvent } from "react";
 import { FaEnvelope, FaLinkedinIn, FaGithub, FaFileLines, FaChessKnight, FaEnvelopeCircleCheck, FaPaperPlane } from "react-icons/fa6";
-import { isReducedMotion } from "@/lib/motion";
+import { isReducedMotion, markViewTransition } from "@/lib/motion";
 import { SettingsMenu } from "@/components/SettingsMenu";
 import { ProjectCarousel } from "@/components/ProjectCarousel";
 import styles from "./page.module.css";
@@ -248,7 +248,7 @@ export default function Home() {
                             {typedIntoLink && (
                                 <Link
                                     href={CURRENT_PROJECT.href}
-                                    // className="text-blue-600 hover:underline dark:text-blue-400"
+                                    onClick={() => markViewTransition("enter")}
                                     className="text-accent hover:underline"
                                 >
                                     {linkTextTyped}

@@ -32,3 +32,23 @@ export function applyMotion(pref: MotionPref = getMotionPref()): void {
     if (typeof document === "undefined") return;
     document.documentElement.classList.toggle("reduce-motion", isReducedMotion(pref));
 }
+
+// ---------------------------------------------------------------------------
+// View-transition direction.
+//
+// The two ends of a home↔project transition want different things, and CSS
+// can't tell them apart: ::view-transition-old(root) is "home" on the way in
+// and "the project page" on the way out. So the outgoing click tags <html>
+// with data-vt and globals.css reads it (same trick as data-slide).
+//
+// Only the ENTER direction is tagged. Leaving is the untagged default, which
+// means a browser/swipe back — where no click handler ever runs — still gets
+// the gentler exit treatment rather than a hard cut.
+export function markViewTransition(dir: "enter" | "exit", ms = 700): void {
+    if (typeof document === "undefined") return;
+    const root = document.documentElement;
+    root.dataset.vt = dir;
+    window.setTimeout(() => {
+        if (root.dataset.vt === dir) delete root.dataset.vt;
+    }, ms);
+}

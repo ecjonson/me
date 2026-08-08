@@ -283,9 +283,9 @@ export function ProjectView({ project }: { project: Project }) {
     return (
         <ViewTransition default="vt-page">
             <div className="relative">
-                {/* Ambient backdrop. Its view-transition-name (project-backdrop) is set
-                    inside ProjectBackdrop, so it's captured as its own group and fades
-                    in/out via CSS — no React wrapper needed. */}
+                {/* Ambient backdrop. Carries `vt-backdrop`, which names it project-backdrop
+                    at every size (see globals.css) — its own group is what keeps the wash
+                    behind the morphing image, and it fades in on arrival only. */}
                 <ProjectBackdrop seed={project.slug} />
 
                 {/* Close (×) — mobile only, where the nav sits at the bottom and the page
@@ -302,24 +302,29 @@ export function ProjectView({ project }: { project: Project }) {
                 {/* Section outline.
                     Mobile: bottom bar with a back bubble pinned left + a left-aligned
                             label strip (active tab sits next to the back button).
-                    Desktop (lg): left rail, same bubble aesthetic. Carries the
-                    view-transition-name section-nav so it slides in/out as its own group. */}
+                    Desktop (lg): left rail, same bubble aesthetic.
+                    `vt-section-nav` applies view-transition-name: section-nav — but only
+                    at lg and up (see globals.css). On mobile the bar deliberately has NO
+                    name: it's the twin of home's contact bar, so sliding one out while an
+                    identical one slides in just reads as jitter. Unnamed, it rides along
+                    inside the page snapshot instead. */}
                 <nav
                     ref={navRef}
                     aria-label="Sections"
-                    style={{ viewTransitionName: "section-nav" }}
-                    className="fixed inset-x-0 bottom-0 z-40 flex h-14 touch-none items-center gap-1 overscroll-contain border-t border-gray-200/70 bg-white/80 px-2 backdrop-blur-sm lg:inset-x-auto lg:left-0 lg:top-0 lg:h-dvh lg:w-40 lg:flex-col lg:items-start lg:justify-center lg:gap-2 lg:border-t-0 lg:border-r lg:px-4 dark:border-gray-800/70 dark:bg-gray-950/60"
+                    className="vt-section-nav fixed inset-x-0 bottom-0 z-40 flex h-14 touch-none items-center gap-1 overscroll-contain border-t border-gray-200/70 bg-white/80 px-2 backdrop-blur-sm lg:inset-x-auto lg:left-0 lg:top-0 lg:h-dvh lg:w-40 lg:flex-col lg:items-start lg:justify-center lg:gap-2 lg:border-t-0 lg:border-r lg:px-4 dark:border-gray-800/70 dark:bg-gray-950/60"
                 >
-                    {/* Home — desktop only; a compact frosted bubble pinned to the page's
+                    {/* Home — desktop only; a compact frosted pill pinned to the page's
                         top-left (mirrors the mobile ×). Absolutely positioned so it sits in
                         the corner rather than the centered rail stack, but kept inside the
-                        nav so it still slides in with the rail. */}
+                        nav so it still slides in with the rail. The arrow is decorative;
+                        the "Back" label is the accessible name. */}
                     <Link
                         href="/"
-                        aria-label="Back"
-                        className="absolute left-4 top-4 hidden h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-lg leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:flex dark:bg-gray-800/90 dark:text-gray-300"
+                        title="Back to projects"
+                        className="absolute left-4 top-4 hidden h-9 items-center gap-1.5 rounded-full bg-gray-100/90 pl-2.5 pr-3.5 text-sm font-medium leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:inline-flex dark:bg-gray-800/90 dark:text-gray-300"
                     >
-                        ←
+                        <span aria-hidden="true" className="text-lg leading-none">←</span>
+                        Back
                     </Link>
 
                     {/* Previous project — desktop rail only, pinned at the top to mirror
@@ -437,12 +442,11 @@ export function ProjectView({ project }: { project: Project }) {
                                 </div>
                             </ViewTransition>
 
-                            {/* Hero copy. view-transition-name hero-copy makes it its own
-                                group, so it fades + rises in / fades out via CSS. */}
-                            <div
-                                className="absolute inset-x-0 bottom-0 z-10 mx-auto w-full max-w-5xl px-6 pb-16 sm:px-8"
-                                style={{ viewTransitionName: "hero-copy" }}
-                            >
+                            {/* Hero copy. `vt-hero-copy` applies view-transition-name:
+                                hero-copy at lg and up (see globals.css), making it its own
+                                group so it fades + rises in / fades out. Unnamed on mobile,
+                                where the split-out group doesn't survive the trip. */}
+                            <div className="vt-hero-copy absolute inset-x-0 bottom-0 z-10 mx-auto w-full max-w-5xl px-6 pb-16 sm:px-8">
                                 <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">{project.name}</h1>
                                 <p className="mt-3 max-w-2xl text-lg text-gray-200">{project.blurb}</p>
                                 {project.links?.length ? (

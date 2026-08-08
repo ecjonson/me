@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Fragment, ViewTransition, useLayoutEffect, useRef } from "react";
 import { projects } from "@/lib/projects";
+import { markViewTransition } from "@/lib/motion";
 
 // Roll-in timing.
 // ROLL_BASE holds the stagger until the reveal wrapper (page.tsx) has finished
@@ -91,7 +92,12 @@ export function ProjectCarousel({ intro = false }: { intro?: boolean }) {
                             className={`shrink-0 snap-start ${intro ? "carousel-roll-in" : ""}`}
                             style={intro ? { animationDelay: `${delay}ms` } : undefined}
                         >
-                            <Link href={`/projects/${slug}`} title={blurb} className="group flex flex-col items-center gap-2">
+                            <Link
+                                href={`/projects/${slug}`}
+                                title={blurb}
+                                onClick={() => markViewTransition("enter")}
+                                className="group flex flex-col items-center gap-2"
+                            >
                                 {/* Shared element: this thumbnail morphs into the hero image on the
                                     project page. `name` must match the hero and be unique per snapshot,
                                     so it's keyed by slug. `share="morph"` tags the group as .morph for CSS. */}

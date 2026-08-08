@@ -24,6 +24,11 @@ const mix = (pct: number) => `color-mix(in srgb, var(--accent) ${pct}%, transpar
 //   lines — fine diagonal hairlines       glow  — soft drifting radial (per project)
 //   frame — a thin inset accent border (gallery mat)
 // Omit `variant` to get a stable, seed-picked one per project.
+//
+// Every variant carries `vt-backdrop`, which globals.css turns into
+// view-transition-name: project-backdrop. Its own group is what keeps the wash
+// underneath the morphing hero image (z-index: -1) instead of riding along in
+// the page snapshot, which is painted above the morph.
 export function ProjectBackdrop({ seed, variant }: { seed: string; variant?: Variant }) {
     const { resolved, spots } = useMemo(() => {
         const h = hash(seed);
@@ -41,8 +46,7 @@ export function ProjectBackdrop({ seed, variant }: { seed: string; variant?: Var
         return (
             <div
                 aria-hidden="true"
-                style={{ viewTransitionName: "project-backdrop" }}
-                className="pointer-events-none fixed inset-3 -z-10 rounded-3xl border border-accent/20 lg:inset-6"
+                className="vt-backdrop pointer-events-none fixed inset-3 -z-10 rounded-3xl border border-accent/20 lg:inset-6"
             />
         );
     }
@@ -85,8 +89,7 @@ export function ProjectBackdrop({ seed, variant }: { seed: string; variant?: Var
     return (
         <div
             aria-hidden="true"
-            style={{ viewTransitionName: "project-backdrop" }}
-            className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+            className="vt-backdrop pointer-events-none fixed inset-0 -z-10 overflow-hidden"
         >
             <div
                 className={`absolute inset-[-10%] ${drift ? "motion-safe:animate-[backdrop-drift_26s_ease-in-out_infinite_alternate]" : ""}`}
