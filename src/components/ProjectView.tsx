@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { ViewTransition, useEffect, useRef, useState } from "react";
 import { ProjectBackdrop } from "@/components/ProjectBackdrop";
 import { projects } from "@/lib/projects";
-import { isReducedMotion } from "@/lib/motion";
+import { isReducedMotion, markViewTransition } from "@/lib/motion";
 import type { Project, ProjectLink, ProjectSection } from "@/lib/projects";
 
 /**
@@ -205,13 +205,33 @@ export function ProjectView({ project }: { project: Project }) {
     // Mainly a desktop/keyboard nicety, but harmless everywhere. Routes to "/" (home),
     // matching the back/× controls rather than browser history.
     const router = useRouter();
+
+    // Every route out of a project tags <html data-vt="exit"> so globals.css can
+    // treat leaving differently from arriving (CSS can't tell them apart — the
+    // old root snapshot is "home" one way and "this page" the other).
+    const leaveHome = () => markViewTransition("exit");
+
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
-            if (e.key === "Escape" && !e.defaultPrevented) router.push("/");
+            if (e.key === "Escape" && !e.defaultPrevented) {
+                leaveHome();
+                router.push("/");
+            }
         };
         window.addEventListener("keydown", onKey);
         return () => window.removeEventListener("keydown", onKey);
     }, [router]);
+
+    // History back — the browser button, Android's back gesture, iOS edge-swipe —
+    // never runs a click handler, so tag it here as well. Without this a gesture
+    // back falls through to the untagged default and the page pops instead of
+    // leaving with the morph. popstate fires before the router commits, so the
+    // attribute is in place by the time the transition captures.
+    useEffect(() => {
+        const onPop = () => markViewTransition("exit");
+        window.addEventListener("popstate", onPop);
+        return () => window.removeEventListener("popstate", onPop);
+    }, []);
 
     const slideDir = (dir: "next" | "prev") => () => {
         if (typeof document === "undefined" || isReducedMotion()) return;
@@ -294,6 +314,7 @@ export function ProjectView({ project }: { project: Project }) {
                 <Link
                     href="/"
                     aria-label="Close"
+                    onClick={leaveHome}
                     className="fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-lg leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:hidden dark:bg-gray-800/90 dark:text-gray-300"
                 >
                     ×
@@ -321,6 +342,7 @@ export function ProjectView({ project }: { project: Project }) {
                     <Link
                         href="/"
                         title="Back to projects"
+                        onClick={leaveHome}
                         className="absolute left-4 top-4 hidden h-9 items-center gap-1.5 rounded-full bg-gray-100/90 pl-2.5 pr-3.5 text-sm font-medium leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:inline-flex dark:bg-gray-800/90 dark:text-gray-300"
                     >
                         <span aria-hidden="true" className="text-lg leading-none">←</span>
@@ -361,6 +383,7 @@ export function ProjectView({ project }: { project: Project }) {
                         <Link
                             href="/"
                             aria-label="Back"
+                            onClick={leaveHome}
                             className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-base text-gray-600 transition-colors hover:text-accent lg:hidden dark:bg-gray-800 dark:text-gray-300"
                         >
                             ←

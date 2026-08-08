@@ -179,11 +179,17 @@ html[data-slide="prev"]::view-transition-new(*) { animation: vt-slide-in-left   
    here. Matching the two means the result no longer depends on which layer the
    content ended up in.
    The html[data-slide] rules above still override this (!important) for slides. */
-::view-transition-group(.vt-page),
-::view-transition-new(.vt-page),
-::view-transition-new(root) { animation: none; }
-::view-transition-old(.vt-page),
-::view-transition-old(root) { animation: 260ms ease-in both vt-page-out; }
+/* NOTE: deliberately five rules, not two comma-joined ones. `.vt-page` is a
+   view-transition-CLASS selector, and if an engine doesn't support
+   view-transition-class it treats that selector as invalid — which drops the
+   ENTIRE comma-separated rule, taking the `root` half down with it. Written
+   separately, the name-based rules survive on their own. Same reason the
+   `.morph` rules above are standalone. */
+::view-transition-group(.vt-page) { animation: none; }
+::view-transition-new(.vt-page)   { animation: none; }
+::view-transition-new(root)       { animation: none; }
+::view-transition-old(.vt-page)   { animation: 260ms ease-in both vt-page-out; }
+::view-transition-old(root)       { animation: 260ms ease-in both vt-page-out; }
 @keyframes vt-page-out { to { opacity: 0; } }
 
 /* Entering a project: home leaves at once instead of fading.
@@ -192,6 +198,25 @@ html[data-slide="prev"]::view-transition-new(*) { animation: vt-slide-in-left   
    other reads as a doubled bar rather than a hand-off. Nothing on the incoming
    page is waiting for the outgoing one, so there's nothing to lose by cutting.
    Tagged by markViewTransition("enter") on the way out of home (see lib/motion).
-   Deliberately one-directional: leaving a project — including a browser or
-   swipe back, where no click handler ever runs — falls through to the fade. */
+   One-directional: exits are tagged separately (see below), so nothing here
+   fires on the way back. */
 html[data-vt="enter"]::view-transition-old(root) { animation: 1ms linear both vt-hold-hidden; }
+
+/* Leaving a project on small screens: every old snapshot leaves WITH the morph.
+   This is the blunt version of the rule above it, and deliberately so. On mobile
+   we can't be sure which group the project's chrome ends up in — its own named
+   group, the React-named page wrapper, or root — and if it lands somewhere we
+   didn't style it holds at full opacity for the whole 500ms morph and then pops
+   out at the end. `*` doesn't care where it landed, and `!important` beats
+   whatever the UA or React would otherwise apply. It's the same hammer the
+   project↔project slide already uses, which is the one exit that behaves on
+   mobile today — the difference isn't the direction, it's the selector.
+
+   This also sweeps up the backdrop's instant hide on mobile, so on the way back
+   the wash fades out with everything else instead of blinking off first.
+   Desktop keeps the choreographed exit (nav slides left, copy fades, backdrop
+   cuts) — nothing above lg is touched.
+   data-slide still wins over this: it's the more specific selector. */
+@media (max-width: 1023px) {
+    html[data-vt="exit"]::view-transition-old(*) { animation: 240ms ease-in both vt-page-out !important; }
+}
