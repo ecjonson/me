@@ -68,6 +68,15 @@ export function ProjectCarousel({ intro = false }: { intro?: boolean }) {
     useLayoutEffect(() => {
         const list = listRef.current;
         if (!intro || !list) return;
+        // Reset to the resting position FIRST. Replaying the greeting after
+        // coming back from a project meant the strip was still scrolled to that
+        // project's centred thumbnail, and every offset below was measured
+        // against that scroll — so the roll-in started mid-strip and settled on
+        // the centred project instead of sweeping the whole row. The intro
+        // always plays from the newest project at the left edge.
+        list.scrollLeft = 0;
+        // Drop the centring hint too, so it can't re-apply on a later mount.
+        try { sessionStorage.removeItem("lastProject"); } catch {}
         const els = list.querySelectorAll<HTMLElement>(".carousel-roll-in");
         els.forEach((el) => {
             const home = el.offsetLeft - list.scrollLeft; // resting distance from the left edge

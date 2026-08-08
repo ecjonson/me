@@ -214,6 +214,41 @@ html[data-slide="prev"]::view-transition-new(*) { animation: vt-slide-in-left   
     ::view-transition-new(project-body)  { animation: none; }
 }
 
+/* Post-transition hold — mobile, leaving a project.
+   When a transition ends the browser destroys the snapshots and un-hides the
+   real elements. React is supposed to have unmounted the outgoing page by then;
+   on a phone it's a frame or two late, and that gap is the flash — the nav,
+   text, close button and hero image all reappearing at full opacity right after
+   the morph lands. Nothing is wrong with the transition; you're seeing what's
+   underneath it.
+
+   So: once a transition is in flight, fade these to nothing and HOLD (forwards,
+   no backwards fill) until React catches up. The old snapshots were taken the
+   instant startViewTransition ran, well before this 80ms delay, so the exit
+   animation still has real pixels to work with — and while the transition is
+   running these elements aren't painted anyway, so hiding them early costs
+   nothing. .vt-page-body covers the hero image too, since the image lives
+   inside the scroller.
+
+   The delay must clear the capture but is otherwise unconstrained; it does NOT
+   need to match the transition length. data-vt outlives the whole sequence
+   (see markViewTransition), which is what keeps the hold in place afterwards. */
+@keyframes vt-post-exit-hide { to { opacity: 0; } }
+@media (max-width: 1023px) {
+    html[data-vt="exit"] .vt-page-body,
+    html[data-vt="exit"] .vt-section-nav,
+    html[data-vt="exit"] .vt-close,
+    html[data-vt="exit"] .vt-backdrop {
+        animation: vt-post-exit-hide 1ms linear 80ms forwards;
+    }
+    /* Motion off means the swap is instant and there's no gap to paper over —
+       and no transition to hide behind if the navigation stalls. */
+    .reduce-motion[data-vt="exit"] .vt-page-body,
+    .reduce-motion[data-vt="exit"] .vt-section-nav,
+    .reduce-motion[data-vt="exit"] .vt-close,
+    .reduce-motion[data-vt="exit"] .vt-backdrop { animation: none; }
+}
+
 /* Entering a project: home leaves at once instead of fading.
    On small screens home's contact bar and the project's section nav are twins
    sitting in the same place, both translucent — so fading one out under the

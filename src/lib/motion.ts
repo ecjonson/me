@@ -41,10 +41,15 @@ export function applyMotion(pref: MotionPref = getMotionPref()): void {
 // and "the project page" on the way out. So the outgoing click tags <html>
 // with data-vt and globals.css reads it (same trick as data-slide).
 //
-// Only the ENTER direction is tagged. Leaving is the untagged default, which
-// means a browser/swipe back — where no click handler ever runs — still gets
-// the gentler exit treatment rather than a hard cut.
-export function markViewTransition(dir: "enter" | "exit", ms = 700): void {
+// Only the ENTER direction is tagged for the transition itself. Leaving is the
+// untagged default there, which means a browser/swipe back — where no click
+// handler ever runs — still gets the gentler exit treatment rather than a hard
+// cut. Exits ARE tagged separately, for the mobile sweep and the post-exit hold.
+//
+// The 900ms default deliberately outlives the transition: globals.css keeps the
+// outgoing page hidden for as long as this attribute is set, covering the gap
+// between the transition ending and React unmounting the old page.
+export function markViewTransition(dir: "enter" | "exit", ms = 900): void {
     if (typeof document === "undefined") return;
     const root = document.documentElement;
     root.dataset.vt = dir;
