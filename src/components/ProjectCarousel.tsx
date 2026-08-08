@@ -47,16 +47,16 @@ export function ProjectCarousel({ intro = false }: { intro?: boolean }) {
     // Returning from a project: center its thumbnail before paint so the reverse
     // morph has a visible source. Gated on lastProject, so a cold load of "/"
     // keeps the default position (newest, at the left).
-    useLayoutEffect(() => {
-        let slug: string | null = null;
-        try { slug = sessionStorage.getItem("lastProject"); } catch {}
-        if (!slug) return;
-        itemRefs.current.get(slug)?.scrollIntoView({
-            inline: "center",
-            block: "nearest",
-            behavior: "instant" as ScrollBehavior,
-        });
-    }, []);
+    // useLayoutEffect(() => {
+    //     let slug: string | null = null;
+    //     try { slug = sessionStorage.getItem("lastProject"); } catch {}
+    //     if (!slug) return;
+    //     itemRefs.current.get(slug)?.scrollIntoView({
+    //         inline: "center",
+    //         block: "nearest",
+    //         behavior: "instant" as ScrollBehavior,
+    //     });
+    // }, []);
 
     // Roll-in start positions. Each item should begin off-screen past the
     // carousel's LEFT edge and slide right into its slot — a different distance
