@@ -81,7 +81,7 @@ export function ProjectCarousel({ intro = false }: { intro?: boolean }) {
 
     return (
         <ul ref={listRef} className="relative flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:thin]">
-            {projects.map(({ slug, name, year, blurb, image, alt }, i) => {
+            {projects.map(({ slug, name, year, blurb, image, alt, animated=false }, i) => {
                 // leading marker
                 const newYear = i === 0 || year !== projects[i - 1].year;
                 // oldest (highest index, rightmost) fires first.
@@ -107,6 +107,7 @@ export function ProjectCarousel({ intro = false }: { intro?: boolean }) {
                                             src={image}
                                             alt={alt}
                                             fill
+                                            unoptimized={animated}
                                             priority={i === 0}
                                             sizes="160px"
                                             className="object-cover transition-transform duration-300 ease-out group-hover:scale-110 group-active:scale-110"

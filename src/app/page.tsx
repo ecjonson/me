@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import { FaEnvelope, FaLinkedinIn, FaGithub, FaFileLines, FaChessKnight, FaEnvelopeCircleCheck, FaPaperPlane } from "react-icons/fa6";
 import { isReducedMotion, markViewTransition } from "@/lib/motion";
 import { SettingsMenu } from "@/components/SettingsMenu";
@@ -129,14 +129,17 @@ export default function Home() {
     const [cursorGone, setCursorGone] = useState(false);
     const [ready, setReady] = useState(false);
     const [replay, setReplay] = useState(0);
+    const cancelled = useRef(false);
 
     useEffect(() => {
+        cancelled.current = false;
         const greeted = !!sessionStorage.getItem("greeted");
         const reduce = isReducedMotion();
 
         // skip greeting?
         if (greeted || reduce) {
             const skip = setTimeout(() => {
+                cancelled.current = true;
                 setTyped(FULL.length);
                 setRevealed(true);
                 setCursorGone(true);
@@ -148,6 +151,7 @@ export default function Home() {
         let timer: ReturnType<typeof setTimeout>;
 
         const tick = (i: number) => {
+            if (cancelled.current) return;
             if (i >= FULL.length) {
                 timer = setTimeout(() => setCursorGone(true), CURSOR_DELAY);
                 return;
@@ -185,6 +189,25 @@ export default function Home() {
         }
         return () => document.body.classList.remove("overflow-hidden");
     }, [revealed]);
+
+    // Skip on input
+    useEffect(() => {
+        if (cursorGone) return; // already finished — nothing to skip
+        const skip = () => {
+            cancelled.current = true;
+            setTyped(FULL.length);
+            setRevealed(true);
+            setCursorGone(true);
+            setReady(true);
+            try { sessionStorage.setItem("greeted", "1"); } catch {}
+        };
+        window.addEventListener("pointerdown", skip);
+        window.addEventListener("keydown", skip);
+        return () => {
+            window.removeEventListener("pointerdown", skip);
+            window.removeEventListener("keydown", skip);
+        };
+    }, [cursorGone, replay]);
 
     const replayGreeting = () => {
         sessionStorage.removeItem("greeted");

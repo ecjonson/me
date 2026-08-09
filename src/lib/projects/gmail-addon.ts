@@ -4,7 +4,7 @@ export const gmailAddon: Project = {
     slug: "gmail-addon",
     name: "InterAction+ for Gmail",
     year: 2023,
-    blurb: "Senior design project with LexisNexis to extend their Outlook extension toolkit InterAction+ into Google Workspace.",
+    blurb: "Senior design project with LexisNexis to extend their Outlook extension toolkit InterAction+ into Google Workspace. Image from posters and pies event, NCSU.",
     image: "/projects/interaction_plus/posters_and_pies_02.jpeg",
     alt: "Senior design posters and pies group photo 2023",
     focal: "center right",
@@ -50,7 +50,7 @@ export const gmailAddon: Project = {
             id: "staging",
             label: "Staging",
             heading: "Project staging",
-            body: "To keep a student team building in parallel, I broke the work into staged, dependency-ordered tasks in a shared JSON, so everyone always knew what was unblocked and ready to pick up next.",
+            body: "To keep a student team building in parallel cleanly and efficiently, I wired the project and prepared us for system testing. We used Jest for unit testing.",
             image: "/projects/interaction_plus/staging_01.png",
             alt: "Project staging JSON file.",
             focal: "center left",
@@ -68,8 +68,8 @@ export const gmailAddon: Project = {
         {
             id: "reflection",
             label: "Reflection",
-            heading: "Reflection",
-            body: "This project taught me how careful design and disciplined task staging matter when a team is shipping against an unfamiliar platform on a deadline, and was a fun exercise on overcoming framework limitations.",
+            heading: "My experience",
+            body: "This project taught me how careful design and disciplined planning matter when a team is shipping against an unfamiliar platform on a deadline, and it was a fun exercise on overcoming (framework) limitations.",
         },
     ],
 };
