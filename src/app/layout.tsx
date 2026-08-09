@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
+import { DEFAULT_CUSTOM } from "@/lib/theme";
 import "./globals.css";
 
 const themeScript = `
@@ -18,8 +19,8 @@ const themeScript = `
             if (t === 'custom') {
                 var c = {};
                 try { c = JSON.parse(localStorage.getItem('customTheme') || '{}'); } catch (e) {}
-                var primary = c.primary || c.bg || '#282a36';
-                var ac = c.accent || '#bd93f9';
+                var primary = c.primary || c.bg || '${DEFAULT_CUSTOM.primary}';
+                var ac = c.accent || '${DEFAULT_CUSTOM.accent}';
                 root.style.setProperty('--background', primary);
                 root.style.setProperty('--accent', ac);
                 if (isDark(primary)) root.classList.add('dark');
@@ -31,17 +32,27 @@ const themeScript = `
             var mp = localStorage.getItem('motion') || 'system';
             var mReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
             if (mp === 'reduced' || (mp === 'system' && mReduce)) root.classList.add('reduce-motion');
+
+            var bg = getComputedStyle(root).getPropertyValue('--background').trim();
+            if (bg) {
+                var meta = document.querySelector('meta[name="theme-color"]');
+                if (meta) meta.setAttribute('content', bg);
+            }
         } catch (e) {}
     })();
 `;
 
+export const viewport: Viewport = {
+    themeColor: "#ffffff",
+};
+
 export const metadata: Metadata = {
     title: "Evan Jonson",
-    description: "Computer scientist and graphics researcher and programmer.",
+    description: "Computer scientist, engineer, graphics researcher, and programmer.",
     metadataBase: new URL("https://evanjonson.com"),
     openGraph: {
         title: "Evan Jonson",
-        description: "Computer scientist and graphics researcher and programmer.",
+        description: "Computer scientist, engineer, graphics researcher, and programmer.",
         url: "https://evanjonson.com",
         siteName: "Evan Jonson",
         type: "website",

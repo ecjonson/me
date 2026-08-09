@@ -44,6 +44,16 @@ export function isDarkColor(hex: string): boolean {
     return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b) < 0.5;
 }
 
+export function syncThemeColor(): void {
+    if (typeof document === "undefined") return;
+    const bg = getComputedStyle(document.documentElement)
+        .getPropertyValue("--background")
+        .trim();
+    if (!bg) return;
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", bg);
+}
+
 // custom mode writes primary + accent inline on <html>
 export function applyTheme(theme: Theme, custom: CustomColors = getCustomColors()): void {
     if (typeof document === "undefined") return;
@@ -59,6 +69,7 @@ export function applyTheme(theme: Theme, custom: CustomColors = getCustomColors(
         root.style.removeProperty("--accent");
         root.classList.toggle("dark", theme === "dark" || (theme === "system" && systemPrefersDark()));
     }
+    syncThemeColor();
 }
 
 export function setTheme(theme: Theme): void {
