@@ -280,7 +280,7 @@ export function ProjectView({ project }: { project: Project }) {
                     href="/"
                     aria-label="Close"
                     prefetch
-                    className="vt-close fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full bg-gray-100/90 text-lg leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:hidden dark:bg-gray-800/90 dark:text-gray-300"
+                    className="vt-close fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 shadow-lg shadow-(color:--accent-softer) bg-gray-100 text-lg leading-none text-gray-600 transition-colors hover:text-accent lg:hidden dark:bg-gray-800 dark:text-gray-300 dark:border-gray-800 "
                 >
                     ×
                 </Link>
@@ -289,7 +289,7 @@ export function ProjectView({ project }: { project: Project }) {
                 <nav
                     ref={navRef}
                     aria-label="Sections"
-                    className="vt-section-nav fixed inset-x-0 bottom-0 z-40 flex h-14 touch-none items-center gap-1 overscroll-contain border-t border-gray-200/70 bg-white/80 px-2 backdrop-blur-sm lg:inset-x-auto lg:left-0 lg:top-0 lg:h-dvh lg:w-40 lg:flex-col lg:items-start lg:justify-center lg:gap-2 lg:border-t-0 lg:border-r lg:px-4 dark:border-gray-800/70 dark:bg-gray-950/60"
+                    className="vt-section-nav fixed inset-x-0 bottom-0 z-40 flex h-14 touch-none items-center gap-1 overscroll-contain border-t border-gray-200/70 bg-white px-2 lg:inset-x-auto lg:left-0 lg:top-0 lg:h-dvh lg:w-40 lg:flex-col lg:items-start lg:justify-center lg:gap-2 lg:border-t-0 lg:border-r lg:px-4 dark:border-gray-800/70 dark:bg-gray-950"
                 >
                     {/* home — desktop only */}
                     <Link
