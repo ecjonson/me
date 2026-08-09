@@ -280,7 +280,7 @@ export function ProjectView({ project }: { project: Project }) {
                     href="/"
                     aria-label="Close"
                     prefetch
-                    className="vt-close fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 shadow-lg shadow-(color:--accent-softer) bg-gray-100 text-lg leading-none text-gray-600 transition-colors hover:text-accent lg:hidden dark:bg-gray-800 dark:text-gray-300 dark:border-gray-800 "
+                    className="vt-close fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full border border-(--accent-soft) bg-gray-100 text-lg leading-none text-gray-600 transition-colors hover:text-accent lg:hidden dark:bg-gray-800 dark:text-gray-300 dark:border-gray-800 "
                 >
                     ×
                 </Link>
