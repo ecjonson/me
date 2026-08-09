@@ -65,6 +65,7 @@ function SectionBlock({ section: s, index }: { section: ProjectSection; index: n
                         src={s.image!}
                         alt={s.alt ?? ""}
                         fill
+                        unoptimized={s.animated}
                         sizes="(min-width: 1024px) 66vw, 100vw"
                         className="object-cover"
                         style={{ objectPosition: s.focal ?? "center" }}
@@ -403,6 +404,7 @@ export function ProjectView({ project }: { project: Project }) {
                                         src={project.image}
                                         alt={project.alt}
                                         fill
+                                        unoptimized={project.animated}
                                         priority
                                         sizes="100vw"
                                         className="object-cover"

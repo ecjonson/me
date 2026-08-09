@@ -22,6 +22,7 @@ export const fluidsSimulator: Project = {
             image: "/projects/metaball_fluids/metaball_fluids_01.gif",
             alt: "Animated metaball fluid melding and deforming in the simulator.",
             focal: "right center",
+            animated: true,
         },
         {
             id: "mesh",
