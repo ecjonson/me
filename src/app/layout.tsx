@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/next';
 import type { Metadata, Viewport } from "next";
 import { DEFAULT_CUSTOM } from "@/lib/theme";
 import "./globals.css";
@@ -69,6 +70,7 @@ export default function RootLayout({
             <body>
                 <script dangerouslySetInnerHTML={{ __html: themeScript }} />
                 {children}
+                <Analytics />
             </body>
         </html>
     );

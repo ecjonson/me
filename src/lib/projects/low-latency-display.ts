@@ -42,9 +42,6 @@ export const lowLatencyDisplay: Project = {
             label: "Solution",
             heading: "The approach",
             body: "Frames cause latency. Our system takes advantage of a property of image-order renderers (ray tracing), where pixels can be displayed the instant they're computed. Interactive latency is minimized by sampling and updating pixels framelessly, individually and just-in-time, along a stochastic scan pattern.",
-            // image: "/projects/thesis/system_comparison.png",
-            // alt: "A moment in motion from the game TETRIS on our prototype frameless system.",
-            // size: "LG",
         },
         {
             id: "results",
