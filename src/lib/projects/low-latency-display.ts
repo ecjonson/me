@@ -32,7 +32,7 @@ export const lowLatencyDisplay: Project = {
             label: "My role",
             heading: "MSCS Thesis",
             body: "Thesis lead — design, implementation, evaluation. Image from Display Week's Innovation Zone (I-Zone), SID 2026, LA.",
-            image: "/projects/thesis/SID_IZone_2026.jpg",
+            image: "/projects/thesis/SID_IZone_2026.jpeg",
             alt: "SID Innovation Zone 2026",
             focal: "center top",
             size: "LG",
