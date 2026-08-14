@@ -123,7 +123,8 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
         applyMotion(next);
     };
 
-    const reduced = motion === "reduced" || (motion === "system" && systemReduced);
+    const systemReducedBySetting = motion === "system" && systemReduced;
+    const reduced = motion === "reduced" || systemReducedBySetting;
     const isCustom = theme === "custom";
     const ThemeIcon = THEME_ICON[theme];
     const MotionIcon = MOTION_ICON[motion];
@@ -205,7 +206,7 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
                         </button>
                         {reduced && (
                             <p className="-mt-2 text-xs text-gray-500 dark:text-gray-500">
-                                The intro is animated — turn motion on to replay it.
+                                { systemReducedBySetting ? "Reduced motion system setting detected — override to replay intro." : "The intro is animated — turn motion on to replay it." }
                             </p>
                         )}
                     </div>
