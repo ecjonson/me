@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Fragment, ViewTransition, useLayoutEffect, useRef } from "react";
 import { projects } from "@/lib/projects";
-import { markViewTransition } from "@/lib/motion";
+import { isReducedMotion, markViewTransition } from "@/lib/motion";
 
 // roll-in timing.
 const ROLL_BASE = 1000; // holds the stagger until the reveal wrapper (page.tsx) has finished fading in
@@ -55,6 +55,7 @@ export function ProjectCarousel({ intro = false }: { intro?: boolean }) {
         // reset to the resting position FIRST
         list.scrollLeft = 0;
         try { sessionStorage.removeItem("lastProject"); } catch {}
+        if ( isReducedMotion() ) return;
         const els = list.querySelectorAll<HTMLElement>(".carousel-roll-in");
         els.forEach((el) => {
             const home = el.offsetLeft - list.scrollLeft; // resting distance from the left edge
