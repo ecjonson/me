@@ -103,7 +103,10 @@ export function ProjectCarousel({ intro = false }: { intro?: boolean }) {
                             >
                                 {/* Shared element */}
                                 <ViewTransition name={`project-${slug}`} share="morph">
-                                    <span className="relative block h-28 w-40 overflow-hidden rounded-2xl border border-gray-200 transition-transform duration-300 ease-out group-hover:scale-105 group-focus-visible:scale-105 group-active:scale-105 dark:border-gray-800">
+                                    <span
+                                        data-morph-thumb
+                                        className="relative block h-28 w-40 overflow-hidden rounded-2xl border border-gray-200 transition-transform duration-300 ease-out group-hover:scale-105 group-focus-visible:scale-105 group-active:scale-105 dark:border-gray-800"
+                                    >
                                         <Image
                                             src={image}
                                             alt={alt}
