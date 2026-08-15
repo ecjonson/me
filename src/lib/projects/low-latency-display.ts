@@ -8,9 +8,33 @@ export const lowLatencyDisplay: Project = {
     image: "/projects/thesis/SIGGRAPH_ETech_2026.jpeg",
     alt: "SIGGRAPH Emerging Technologies 2026",
     focal: "center",
+    // context and media first, then the three publications in descending weight
     links: [
-        { label: "YouTube demo", href: "https://www.youtube.com/watch?v=zViqs_4evNY&list=LL" },
-        { label: "ACM paper", href: "https://dl.acm.org/doi/10.1145/3799826.3812437" },
+        {
+            label: "VX Lab",
+            href: "https://vxlab.csc.ncsu.edu/",
+            title: "Visual Experience Lab, NC State University",
+        },
+        {
+            label: "YouTube demo",
+            href: "https://www.youtube.com/watch?v=zViqs_4evNY",
+            title: "Walkthrough with Nicolas Charbonnier (Charbax) at SID Display Week 2026",
+        },
+        {
+            label: "I3D 2026",
+            href: "https://dl.acm.org/doi/10.1145/3807895.3807936",
+            title: "Technical paper — ACM SIGGRAPH Symposium on Interactive 3D Graphics and Games",
+        },
+        {
+            label: "SIGGRAPH E-Tech 2026",
+            href: "https://dl.acm.org/doi/10.1145/3799826.3812437",
+            title: "Exhibit demo — ACM SIGGRAPH 2026 Emerging Technologies",
+        },
+        {
+            label: "SIGGRAPH PRICE 2026",
+            href: "https://dl.acm.org/doi/10.1145/3799828.3816007",
+            title: "Symposium paper — ACM SIGGRAPH 2026 Workshop on Performance and Rendering in Competitive Esports",
+        },
     ],
     sections: [
         {
@@ -32,7 +56,7 @@ export const lowLatencyDisplay: Project = {
             label: "My role",
             heading: "MSCS Thesis",
             body: "Thesis lead — design, implementation, evaluation. Image from Display Week's Innovation Zone (I-Zone), SID 2026, LA.",
-            image: "/projects/thesis/SID_IZone_2026.jpg",
+            image: "/projects/thesis/SID_IZone_2026.jpeg",
             alt: "SID Innovation Zone 2026",
             focal: "center top",
             size: "LG",
@@ -42,9 +66,6 @@ export const lowLatencyDisplay: Project = {
             label: "Solution",
             heading: "The approach",
             body: "Frames cause latency. Our system takes advantage of a property of image-order renderers (ray tracing), where pixels can be displayed the instant they're computed. Interactive latency is minimized by sampling and updating pixels framelessly, individually and just-in-time, along a stochastic scan pattern.",
-            // image: "/projects/thesis/system_comparison.png",
-            // alt: "A moment in motion from the game TETRIS on our prototype frameless system.",
-            // size: "LG",
         },
         {
             id: "results",

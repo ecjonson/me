@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Fragment, ViewTransition, useLayoutEffect, useRef } from "react";
 import { projects } from "@/lib/projects";
-import { markViewTransition } from "@/lib/motion";
+import { isReducedMotion, markViewTransition } from "@/lib/motion";
 
 // roll-in timing.
 const ROLL_BASE = 1000; // holds the stagger until the reveal wrapper (page.tsx) has finished fading in
@@ -55,6 +55,7 @@ export function ProjectCarousel({ intro = false }: { intro?: boolean }) {
         // reset to the resting position FIRST
         list.scrollLeft = 0;
         try { sessionStorage.removeItem("lastProject"); } catch {}
+        if ( isReducedMotion() ) return;
         const els = list.querySelectorAll<HTMLElement>(".carousel-roll-in");
         els.forEach((el) => {
             const home = el.offsetLeft - list.scrollLeft; // resting distance from the left edge
@@ -80,7 +81,8 @@ export function ProjectCarousel({ intro = false }: { intro?: boolean }) {
     }, [intro, last]);
 
     return (
-        <ul ref={listRef} className="relative flex snap-x snap-mandatory gap-4 overflow-x-auto pb-3 [scrollbar-width:thin]">
+        // overflow-x forces overflow-y to compute as auto, so the list clips its own children.
+        <ul ref={listRef} className="relative flex snap-x snap-mandatory gap-4 overflow-x-auto pt-4 pb-3 [scrollbar-width:thin]">
             {projects.map(({ slug, name, year, blurb, image, alt, animated=false }, i) => {
                 // leading marker
                 const newYear = i === 0 || year !== projects[i - 1].year;
@@ -102,7 +104,10 @@ export function ProjectCarousel({ intro = false }: { intro?: boolean }) {
                             >
                                 {/* Shared element */}
                                 <ViewTransition name={`project-${slug}`} share="morph">
-                                    <span className="relative block h-28 w-40 overflow-hidden rounded-2xl border border-gray-200 transition-transform duration-300 ease-out group-hover:scale-105 group-focus-visible:scale-105 group-active:scale-105 dark:border-gray-800">
+                                    <span
+                                        data-morph-thumb
+                                        className="relative block h-28 w-40 overflow-hidden rounded-2xl transition-all duration-300 ease-out group-hover:shadow-[0_6px_20px_-6px_var(--accent)] group-focus-visible:shadow-[0_6px_20px_-6px_var(--accent)] motion-ok:group-hover:scale-105 motion-ok:group-focus-visible:scale-105 motion-ok:group-active:scale-105"
+                                    >
                                         <Image
                                             src={image}
                                             alt={alt}
@@ -110,7 +115,7 @@ export function ProjectCarousel({ intro = false }: { intro?: boolean }) {
                                             unoptimized={animated}
                                             priority={i === 0}
                                             sizes="160px"
-                                            className="object-cover transition-transform duration-300 ease-out group-hover:scale-110 group-active:scale-110"
+                                            className="object-cover transition-transform duration-300 ease-out motion-ok:group-hover:scale-110 motion-ok:group-active:scale-110"
                                         />
                                     </span>
                                 </ViewTransition>

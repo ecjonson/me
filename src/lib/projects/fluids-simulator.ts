@@ -9,9 +9,22 @@ export const fluidsSimulator: Project = {
     alt: "Fluids simulator",
     focal: "75% center",
     links: [
-        { label: "Demo video", href: "https://ecjonson.github.io/MetaballFluids/demo.mp4" },
-        { label: "Interactive tool", href: "https://ecjonson.github.io/MetaballFluids/", desktopOnly: true },
-        { label: "Github", href: "https://github.com/ecjonson/MetaballFluids" },
+        {
+            label: "Demo video",
+            href: "https://ecjonson.github.io/MetaballFluids/demo.mp4",
+            title: "Recorded walkthrough of the simulator (MP4)",
+        },
+        {
+            label: "Interactive tool",
+            href: "https://ecjonson.github.io/MetaballFluids/",
+            title: "Run the simulator in your browser — WebGL 1.0",
+            desktopOnly: true,
+        },
+        {
+            label: "GitHub",
+            href: "https://github.com/ecjonson/MetaballFluids",
+            title: "Source code — rendering, shading, physics and interface",
+        },
     ],
     sections: [
         {

@@ -4,13 +4,18 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ViewTransition, useEffect, useRef, useState } from "react";
+import { FaXmark, FaArrowLeft, FaHouse } from "react-icons/fa6";
 import { ProjectBackdrop } from "@/components/ProjectBackdrop";
 import { projects } from "@/lib/projects";
 import { isReducedMotion } from "@/lib/motion";
 import type { Project, ProjectLink, ProjectSection } from "@/lib/projects";
 
-/** mobile-first spacing contract that keeps images clear of the fixed nav */
-const SECTION_FRAME = "pt-3 pr-3 pl-3 pb-20 lg:pt-6 lg:pr-6 lg:pb-6 lg:pl-44";
+/** mobile-first spacing contract that keeps images clear of the fixed nav. */
+const SECTION_FRAME =
+    "pt-3 pr-3 pl-3 pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pt-6 lg:pr-6 lg:pb-6 lg:pl-44";
+
+/** mobile image band height */
+const IMAGE_BAND = "h-[36svh] lg:h-auto";
 
 // desktop image width per `size`
 type SectionSize = "XS" | "SM" | "MD" | "LG" | "XL";
@@ -31,8 +36,9 @@ function SectionBlock({ section: s, index }: { section: ProjectSection; index: n
 
     // for XL the copy sits over the image on desktop, so it needs light colours there
     const labelCls = `mb-2 text-sm font-medium uppercase tracking-wide text-accent ${isXL ? "lg:text-[color-mix(in_srgb,var(--accent)_65%,white)]" : ""}`;
-    const headingCls = `text-3xl font-bold tracking-tight sm:text-4xl ${isXL ? "lg:text-white" : ""}`;
-    const bodyCls = `mt-4 text-lg leading-relaxed text-gray-600 dark:text-gray-300 ${isXL ? "lg:text-gray-200 lg:dark:text-gray-200" : ""}`;
+    // fluid down to 320px, settles at text-4xl from sm up
+    const headingCls = `text-[clamp(1.5rem,7vw,2.25rem)] font-bold tracking-tight text-balance sm:text-4xl ${isXL ? "lg:text-white" : ""}`;
+    const bodyCls = `mt-3 text-base leading-relaxed text-pretty break-words hyphens-auto text-gray-600 sm:mt-4 sm:text-lg dark:text-gray-300 ${isXL ? "lg:text-gray-200 lg:dark:text-gray-200" : ""}`;
 
     const text = (
         <>
@@ -44,20 +50,24 @@ function SectionBlock({ section: s, index }: { section: ProjectSection; index: n
 
     if (!hasImage) {
         return (
-            <section id={s.id} className={`flex h-dvh snap-start items-center ${SECTION_FRAME}`}>
-                <div className={`w-full max-w-2xl px-2 sm:px-6 ${reverse ? "lg:ml-auto lg:text-right" : ""}`}>{text}</div>
+            // overlong copy grows the section instead of being clipped
+            <section id={s.id} className={`flex min-h-dvh snap-start ${SECTION_FRAME}`}>
+                {/* my-auto centres when it fits, without the top-clipping that items-center causes */}
+                <div className={`my-auto w-full min-w-0 max-w-2xl px-2 sm:px-6 ${reverse ? "lg:ml-auto lg:text-right" : ""}`}>
+                    {text}
+                </div>
             </section>
         );
     }
 
     return (
-        <section id={s.id} className={`relative h-dvh snap-start ${SECTION_FRAME}`}>
+        <section id={s.id} className={`relative flex min-h-dvh snap-start flex-col ${SECTION_FRAME}`}>
             {/* mobile: stacked split (order alternating), unaffected by size.
                 desktop: image width follows `size`; XL fills and the copy overlays. */}
-            <div className={`relative flex h-full w-full gap-4 lg:gap-6 ${reverse ? "flex-col-reverse lg:flex-row-reverse" : "flex-col lg:flex-row"}`}>
-                {/* image: stacked band on mobile; sized column (or full-bleed for XL) on desktop */}
+            <div className={`relative flex w-full flex-1 gap-4 lg:gap-6 ${reverse ? "flex-col-reverse lg:flex-row-reverse" : "flex-col lg:flex-row"}`}>
+                {/* image: fixed-height band on mobile; sized column (or full-bleed for XL) on desktop */}
                 <div
-                    className={`relative w-full shrink-0 basis-2/5 overflow-hidden rounded-2xl ${
+                    className={`relative w-full shrink-0 overflow-hidden rounded-2xl ${IMAGE_BAND} ${
                         isXL ? "lg:absolute lg:inset-0" : IMAGE_BASIS_LG[size]
                     }`}
                 >
@@ -73,9 +83,9 @@ function SectionBlock({ section: s, index }: { section: ProjectSection; index: n
                     {/* readability scrim — only when the copy overlays (XL, desktop). */}
                     {isXL && <div className="absolute inset-0 hidden bg-linear-to-r from-black/70 via-black/20 to-transparent lg:block" />}
                 </div>
-                {/* Text */}
-                <div className={`flex min-h-0 flex-1 items-center px-4 sm:px-6 lg:px-12 ${isXL ? "lg:relative lg:z-10 lg:max-w-2xl" : ""}`}>
-                    <div className="max-w-xl">{text}</div>
+                {/* text */}
+                <div className={`flex min-w-0 flex-1 items-center px-4 sm:px-6 lg:px-12 ${isXL ? "lg:relative lg:z-10 lg:max-w-2xl" : ""}`}>
+                    <div className="w-full max-w-xl">{text}</div>
                 </div>
             </div>
         </section>
@@ -103,6 +113,9 @@ export function ProjectView({ project }: { project: Project }) {
     // nav element
     const navRef = useRef<HTMLElement>(null);
 
+    // visibility per section
+    const ratios = useRef<Map<string, number>>(new Map());
+
     useEffect(() => {
         const root = scrollerRef.current;
         if (!root) return;
@@ -110,11 +123,25 @@ export function ProjectView({ project }: { project: Project }) {
             .map((i) => root.querySelector<HTMLElement>(`#${CSS.escape(i.id)}`))
             .filter((el): el is HTMLElement => el !== null);
 
+        const seen = ratios.current;
+        seen.clear();
+
         const io = new IntersectionObserver(
             (entries) => {
-                for (const e of entries) if (e.isIntersecting) setActive(e.target.id);
+                for (const e of entries) {
+                    seen.set(e.target.id, e.isIntersecting ? e.intersectionRatio : 0);
+                }
+                let bestId: string | null = null;
+                let best = 0;
+                for (const [id, r] of seen) {
+                    if (r > best) {
+                        best = r;
+                        bestId = id;
+                    }
+                }
+                if (bestId) setActive(bestId);
             },
-            { root, threshold: 0.55 }
+            { root, threshold: [0, 0.2, 0.4, 0.6, 0.8, 1] }
         );
         targets.forEach((t) => io.observe(t));
         return () => io.disconnect();
@@ -159,7 +186,7 @@ export function ProjectView({ project }: { project: Project }) {
             root.scrollBy({ top: delta * unit, behavior: "auto" });
         };
 
-        // touch: track the finger 1:1; snap-mandatory settles on the nearest section
+        // touch: track the finger 1:1; snap settles on the nearest section
         let lastX = 0;
         let lastY = 0;
         const onTouchStart = (e: TouchEvent) => {
@@ -276,21 +303,21 @@ export function ProjectView({ project }: { project: Project }) {
                 {/* ambient backdrop */}
                 <ProjectBackdrop seed={project.slug} />
 
-                {/* close (×) — mobile only */}
+                {/* close — mobile only */}
                 <Link
                     href="/"
                     aria-label="Close"
                     prefetch
-                    className="vt-close fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-gray-100 text-lg leading-none text-gray-600 transition-colors hover:text-accent lg:hidden dark:bg-gray-800 dark:text-gray-300 dark:border-gray-800"
+                    className="vt-close fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-gray-100 text-base leading-none text-gray-600 transition-colors hover:text-accent lg:hidden dark:bg-gray-800 dark:text-gray-300 dark:border-gray-800"
                 >
-                    ×
+                    <FaXmark aria-hidden="true" />
                 </Link>
 
                 {/* section outline. */}
                 <nav
                     ref={navRef}
                     aria-label="Sections"
-                    className="vt-section-nav fixed inset-x-0 bottom-0 z-40 flex h-14 touch-none items-center gap-1 overscroll-contain border-t border-gray-200/70 bg-white px-2 lg:inset-x-auto lg:left-0 lg:top-0 lg:h-dvh lg:w-40 lg:flex-col lg:items-start lg:justify-center lg:gap-2 lg:border-t-0 lg:border-r lg:px-4 dark:border-gray-800/70 dark:bg-gray-950"
+                    className="vt-section-nav fixed inset-x-0 bottom-0 z-40 flex h-[calc(3.5rem+env(safe-area-inset-bottom))] touch-none items-center gap-1 overscroll-contain border-t border-gray-200/70 bg-white px-2 pb-[env(safe-area-inset-bottom)] lg:inset-x-auto lg:left-0 lg:top-0 lg:h-dvh lg:w-40 lg:flex-col lg:items-start lg:justify-center lg:gap-2 lg:border-t-0 lg:border-r lg:px-4 lg:pb-0 dark:border-gray-800/70 dark:bg-gray-950"
                 >
                     {/* home — desktop only */}
                     <Link
@@ -326,18 +353,19 @@ export function ProjectView({ project }: { project: Project }) {
                             onClick={slideDir("prev")}
                             aria-label={`Previous project: ${prevProject.name}`}
                             title={`Previous project: ${prevProject.name}`}
-                            className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--accent-soft) text-base text-accent transition-colors hover:bg-(--accent-softer) lg:hidden"
+                            className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--accent-soft) text-sm text-accent transition-colors hover:bg-(--accent-softer) lg:hidden"
                         >
-                            ←
+                            <FaArrowLeft aria-hidden="true" />
                         </Link>
                     ) : (
                         <Link
                             href="/"
-                            aria-label="Back"
+                            aria-label="Back to projects"
+                            title="Back to projects"
                             prefetch
-                            className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-base text-gray-600 transition-colors hover:text-accent lg:hidden dark:bg-gray-800 dark:text-gray-300"
+                            className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm text-gray-600 transition-colors hover:text-accent lg:hidden dark:bg-gray-800 dark:text-gray-300"
                         >
-                            ←
+                            <FaHouse aria-hidden="true" />
                         </Link>
                     )}
 
@@ -394,10 +422,14 @@ export function ProjectView({ project }: { project: Project }) {
                 </nav>
 
                 {/* vertical snap scroller */}
-                <div ref={scrollerRef} className="vt-page-body h-dvh snap-y snap-mandatory overflow-y-scroll scroll-smooth">
+                <div
+                    ref={scrollerRef}
+                    data-snap-scroller
+                    className="vt-page-body h-dvh snap-y snap-mandatory overflow-y-scroll motion-safe:scroll-smooth"
+                >
                     {/* hero — fullscreen framed image */}
-                    <section id="hero" className={`relative h-dvh snap-start ${SECTION_FRAME}`}>
-                        <div className="relative h-full w-full">
+                    <section id="hero" className={`relative flex min-h-dvh snap-start flex-col ${SECTION_FRAME}`}>
+                        <div className="relative w-full flex-1">
                             <ViewTransition name={`project-${project.slug}`} share="morph">
                                 <div className="absolute inset-0 overflow-hidden rounded-2xl">
                                     <Image
@@ -414,15 +446,17 @@ export function ProjectView({ project }: { project: Project }) {
                                 </div>
                             </ViewTransition>
 
-                            {/* Hero copy `vt-hero-copy` */}
-                            <div className="vt-hero-copy absolute inset-x-0 bottom-0 z-10 mx-auto w-full max-w-5xl px-6 pb-16 sm:px-8">
-                                <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl">{project.name}</h1>
-                                <p className="mt-3 max-w-2xl text-lg text-gray-200">{project.blurb}</p>
+                            {/* hero copy `vt-hero-copy` */}
+                            <div className="vt-hero-copy absolute inset-x-0 bottom-0 z-10 mx-auto w-full max-w-5xl px-4 pb-10 sm:px-8 sm:pb-16">
+                                <h1 className="text-[clamp(1.75rem,8vw,2.25rem)] font-bold tracking-tight text-balance text-white sm:text-6xl">
+                                    {project.name}
+                                </h1>
+                                <p className="mt-3 max-w-2xl text-base text-pretty text-gray-200 sm:text-lg">{project.blurb}</p>
                                 {project.links?.length ? (
-                                    <div className="mt-5 flex flex-wrap items-baseline gap-x-4 gap-y-2">
+                                    <div className="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-2 sm:mt-5">
                                         {project.links.map((l: ProjectLink) => (
                                             <span key={l.href} className="inline-flex items-baseline gap-1.5">
-                                                <a href={l.href} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-300 hover:text-blue-200 hover:underline">
+                                                <a href={l.href} target="_blank" rel="noopener noreferrer" title={l.title} className="text-sm font-medium text-blue-300 hover:text-blue-200 hover:underline">
                                                     {l.label} ↗
                                                 </a>
                                                 {/* only surfaces below lg, where the tool doesn't work. */}

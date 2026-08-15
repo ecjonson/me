@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 256 256" width="256" height="256" role="img" aria-label="EJ">
+  <title>EJ</title>
+  <defs>
+    <path id="px" d="M52 1 51 0H50Q41 0 33.5 2.5Q26 5 20 9.5Q14 14 9.5 20Q5 26 2.5 33.5Q0 41 0 50V51L1 52H52Q52 52 52 52Q52 52 52 52Q52 52 52 52Q52 52 52 52Q52 52 52 52ZM48 1V52Q48 52 48 52Q48 52 48 52Q48 52 48 52Q48 52 48 52Q48 52 48 52H99L100 51V50Q100 41 97.5 33.5Q95 26 90.5 20Q86 14 80 9.5Q74 5 66.5 2.5Q59 0 50 0H49ZM48 99 49 100H50Q59 100 66.5 97.5Q74 95 80 90.5Q86 86 90.5 80Q95 74 97.5 66.5Q100 59 100 50V49L99 48H48Q48 48 48 48Q48 48 48 48Q48 48 48 48Q48 48 48 48Q48 48 48 48ZM52 99V48Q52 48 52 48Q52 48 52 48Q52 48 52 48Q52 48 52 48Q52 48 52 48H1L0 49V50Q0 59 2.5 66.5Q5 74 9.5 80Q14 86 20 90.5Q26 95 33.5 97.5Q41 100 50 100H51Z"/>
+  </defs>
+  <rect width="256" height="256" rx="25.6" ry="25.6" fill="#282A36"/>
+  <g fill="#50FA7B" transform="translate(128 128) scale(0.22 -0.22) translate(-450 -250)">
+      <use href="#px" xlink:href="#px" x="0" y="0"/>
+      <use href="#px" xlink:href="#px" x="0" y="100"/>
+      <use href="#px" xlink:href="#px" x="0" y="200"/>
+      <use href="#px" xlink:href="#px" x="0" y="300"/>
+      <use href="#px" xlink:href="#px" x="0" y="400"/>
+      <use href="#px" xlink:href="#px" x="0" y="500"/>
+      <use href="#px" xlink:href="#px" x="100" y="0"/>
+      <use href="#px" xlink:href="#px" x="100" y="100"/>
+      <use href="#px" xlink:href="#px" x="100" y="200"/>
+      <use href="#px" xlink:href="#px" x="100" y="300"/>
+      <use href="#px" xlink:href="#px" x="100" y="400"/>
+      <use href="#px" xlink:href="#px" x="100" y="500"/>
+      <use href="#px" xlink:href="#px" x="200" y="0"/>
+      <use href="#px" xlink:href="#px" x="200" y="300"/>
+      <use href="#px" xlink:href="#px" x="200" y="500"/>
+      <use href="#px" xlink:href="#px" x="300" y="0"/>
+      <use href="#px" xlink:href="#px" x="300" y="300"/>
+      <use href="#px" xlink:href="#px" x="300" y="500"/>
+      <use href="#px" xlink:href="#px" x="400" y="0"/>
+      <use href="#px" xlink:href="#px" x="400" y="500"/>
+      <use href="#px" xlink:href="#px" x="600" y="-100"/>
+      <use href="#px" xlink:href="#px" x="700" y="-100"/>
+      <use href="#px" xlink:href="#px" x="700" y="0"/>
+      <use href="#px" xlink:href="#px" x="700" y="100"/>
+      <use href="#px" xlink:href="#px" x="700" y="200"/>
+      <use href="#px" xlink:href="#px" x="700" y="300"/>
+      <use href="#px" xlink:href="#px" x="700" y="400"/>
+      <use href="#px" xlink:href="#px" x="700" y="500"/>
+      <use href="#px" xlink:href="#px" x="800" y="0"/>
+      <use href="#px" xlink:href="#px" x="800" y="100"/>
+      <use href="#px" xlink:href="#px" x="800" y="200"/>
+      <use href="#px" xlink:href="#px" x="800" y="300"/>
+      <use href="#px" xlink:href="#px" x="800" y="400"/>
+      <use href="#px" xlink:href="#px" x="800" y="500"/>
+  </g>
+</svg>
