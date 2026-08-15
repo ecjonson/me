@@ -1,6 +1,7 @@
 export type ProjectLink = {
     label: string;
     href: string;
+    title: string;
     desktopOnly?: boolean; // shows a subtle "desktop only" hint on mobile
 };
 
