@@ -1,7 +1,10 @@
 @import "tailwindcss";
+
 @custom-variant dark (&:where(.dark, .dark *));
+@custom-variant motion-ok (&:where(:not(.reduce-motion, .reduce-motion *)));
 
 :root {
+    color-scheme: light;
     --background: #ffffff;
     --foreground: #171717;
     --accent: #2563eb;
@@ -9,6 +12,7 @@
     --accent-softer: color-mix(in srgb, var(--accent) 22%, transparent);
 }
 .dark {
+    color-scheme: dark;
     --background: #0a0a0a;
     --foreground: #ededed;
     --accent: #60a5fa;
@@ -26,7 +30,19 @@ body {
     font-family: Arial, Helvetica, sans-serif;
 }
 
-/* - view transitions - */
+html {
+  overflow-x: clip;
+  scrollbar-gutter: stable;
+}
+
+/* greeting intro: pops out of thin air, overshoots, settles */
+@keyframes headshot-pop {
+    0%   { opacity: 0; transform: scale(0.25); filter: blur(8px); }
+    55%  { opacity: 1; transform: scale(1.22); filter: blur(0); }
+    78%  {              transform: scale(0.93); }
+    100% { opacity: 1; transform: scale(1); }
+}
+.headshot-pop { animation: headshot-pop 560ms cubic-bezier(0.22, 1, 0.36, 1) both; }
 
 /* named groups */
 .vt-backdrop    { view-transition-name: project-backdrop; }
@@ -39,7 +55,7 @@ body {
     .vt-hero-copy { view-transition-name: hero-copy; }
 }
 
-/* (1) shared image morph */
+/* shared image morph */
 ::view-transition-group(.morph) {
     animation-duration: 500ms;
     animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
@@ -59,14 +75,13 @@ body {
 @keyframes vt-morph-blur {
     40% { filter: blur(2px); }
 }
-
 html[data-vt] [data-morph-thumb],
 html[data-vt] [data-morph-thumb] * {
     transform: none !important;
     transition: none !important;
 }
 
-/* (0) ambient backdrop */
+/* ambient backdrop */
 ::view-transition-group(project-backdrop) { z-index: -1; }
 ::view-transition-new(project-backdrop) { animation: 420ms ease-out 500ms both vt-backdrop-in; }
 @media (min-width: 1024px) {
@@ -76,11 +91,11 @@ html[data-vt] [data-morph-thumb] * {
 
 /* only ever match at lg and up */
 @media (min-width: 1024px) {
-    /* (2) hero copy */
+    /* hero copy */
     ::view-transition-new(hero-copy) { animation: 360ms ease-out 460ms both vt-copy-in; }
     ::view-transition-old(hero-copy) { animation: 240ms ease-in both vt-copy-out; }
 
-    /* (3) section nav */
+    /* section nav */
     ::view-transition-new(section-nav) { animation: 420ms cubic-bezier(0.33, 1, 0.68, 1) both vt-nav-in-left; }
     ::view-transition-old(section-nav) { animation: 300ms cubic-bezier(0.4, 0, 1, 1) both vt-nav-out-left; }
 }
@@ -140,7 +155,7 @@ html[data-slide="prev"]::view-transition-new(*) { animation: vt-slide-in-left   
 /* entering a project: home leaves at once instead of fading */
 html[data-vt="enter"]::view-transition-old(root) { animation: 1ms linear both vt-hold-hidden; }
 
-/* - view transitions: collapse every group/old/new to zero time - */
+/* reduced motion */
 .reduce-motion::view-transition-group(*),
 .reduce-motion::view-transition-old(*),
 .reduce-motion::view-transition-new(*) {
@@ -149,7 +164,7 @@ html[data-vt="enter"]::view-transition-old(root) { animation: 1ms linear both vt
     animation-delay: 0s !important;
 }
 
-/* - scroll snapping - */
+/* scroll snapping */
 @media (prefers-reduced-motion: reduce) {
     [data-snap-scroller] {
         scroll-snap-type: none !important;
@@ -159,7 +174,7 @@ html[data-vt="enter"]::view-transition-old(root) { animation: 1ms linear both vt
     scroll-snap-type: none !important;
 }
 
-/* - anchor navigation: instant jump, not an animated scroll - */
+/* anchor navigation */
 @media (prefers-reduced-motion: reduce) {
     html,
     :where(*) {
@@ -171,13 +186,13 @@ html[data-vt="enter"]::view-transition-old(root) { animation: 1ms linear both vt
     scroll-behavior: auto !important;
 }
 
-/* - component animations - */
-.reduce-motion .carousel-roll-in {
-    animation: none;
-}
-
-/* ambient wash on project pages */
-.reduce-motion [data-backdrop],
-.reduce-motion .backdrop-drift {
+/* component animations */
+.reduce-motion .carousel-roll-in,
+.reduce-motion .headshot-pop,
+.reduce-motion [data-backdrop] {
     animation: none !important;
+}
+.reduce-motion [data-coin],
+.reduce-motion [data-coin] * {
+    transition: none !important;
 }

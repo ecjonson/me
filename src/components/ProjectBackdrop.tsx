@@ -82,7 +82,8 @@ export function ProjectBackdrop({ seed, variant }: { seed: string; variant?: Var
             className="vt-backdrop pointer-events-none fixed inset-0 -z-10 overflow-hidden"
         >
             <div
-                className={`absolute inset-[-10%] ${drift ? "motion-safe:animate-[backdrop-drift_26s_ease-in-out_infinite_alternate]" : ""}`}
+                data-backdrop
+                className={`absolute inset-[-10%] ${drift ? "animate-[backdrop-drift_26s_ease-in-out_infinite_alternate]" : ""}`}
                 style={style}
             />
         </div>

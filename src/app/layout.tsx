@@ -43,20 +43,39 @@ const themeScript = `
     })();
 `;
 
+// deliberately a single unconditional value: themeScript rewrites this meta at runtime
 export const viewport: Viewport = {
     themeColor: "#ffffff",
 };
 
+const TITLE = "Evan Jonson";
+const DESCRIPTION = "Computer scientist, engineer, graphics researcher, and programmer.";
+
 export const metadata: Metadata = {
-    title: "Evan Jonson",
-    description: "Computer scientist, engineer, graphics researcher, and programmer.",
+    title: {
+        default: TITLE,
+        template: `%s — ${TITLE}`, // project pages supply just their own name
+    },
+    description: DESCRIPTION,
     metadataBase: new URL("https://evanjonson.com"),
+    applicationName: TITLE,
+    authors: [{ name: TITLE, url: "https://evanjonson.com" }],
+    creator: TITLE,
+    alternates: {
+        canonical: "/",
+    },
     openGraph: {
-        title: "Evan Jonson",
-        description: "Computer scientist, engineer, graphics researcher, and programmer.",
+        title: TITLE,
+        description: DESCRIPTION,
         url: "https://evanjonson.com",
-        siteName: "Evan Jonson",
+        siteName: TITLE,
         type: "website",
+        locale: "en_US",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: TITLE,
+        description: DESCRIPTION,
     },
 };
 

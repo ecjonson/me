@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ViewTransition, useEffect, useRef, useState } from "react";
+import { FaXmark, FaArrowLeft, FaHouse } from "react-icons/fa6";
 import { ProjectBackdrop } from "@/components/ProjectBackdrop";
 import { projects } from "@/lib/projects";
 import { isReducedMotion } from "@/lib/motion";
@@ -302,14 +303,14 @@ export function ProjectView({ project }: { project: Project }) {
                 {/* ambient backdrop */}
                 <ProjectBackdrop seed={project.slug} />
 
-                {/* close (×) — mobile only */}
+                {/* close — mobile only */}
                 <Link
                     href="/"
                     aria-label="Close"
                     prefetch
-                    className="vt-close fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-gray-100 text-lg leading-none text-gray-600 transition-colors hover:text-accent lg:hidden dark:bg-gray-800 dark:text-gray-300 dark:border-gray-800"
+                    className="vt-close fixed right-4 top-4 z-50 flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 bg-gray-100 text-base leading-none text-gray-600 transition-colors hover:text-accent lg:hidden dark:bg-gray-800 dark:text-gray-300 dark:border-gray-800"
                 >
-                    ×
+                    <FaXmark aria-hidden="true" />
                 </Link>
 
                 {/* section outline. */}
@@ -352,18 +353,19 @@ export function ProjectView({ project }: { project: Project }) {
                             onClick={slideDir("prev")}
                             aria-label={`Previous project: ${prevProject.name}`}
                             title={`Previous project: ${prevProject.name}`}
-                            className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--accent-soft) text-base text-accent transition-colors hover:bg-(--accent-softer) lg:hidden"
+                            className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-(--accent-soft) text-sm text-accent transition-colors hover:bg-(--accent-softer) lg:hidden"
                         >
-                            ←
+                            <FaArrowLeft aria-hidden="true" />
                         </Link>
                     ) : (
                         <Link
                             href="/"
-                            aria-label="Back"
+                            aria-label="Back to projects"
+                            title="Back to projects"
                             prefetch
-                            className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-base text-gray-600 transition-colors hover:text-accent lg:hidden dark:bg-gray-800 dark:text-gray-300"
+                            className="mr-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm text-gray-600 transition-colors hover:text-accent lg:hidden dark:bg-gray-800 dark:text-gray-300"
                         >
-                            ←
+                            <FaHouse aria-hidden="true" />
                         </Link>
                     )}
 
@@ -454,7 +456,7 @@ export function ProjectView({ project }: { project: Project }) {
                                     <div className="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-2 sm:mt-5">
                                         {project.links.map((l: ProjectLink) => (
                                             <span key={l.href} className="inline-flex items-baseline gap-1.5">
-                                                <a href={l.href} target="_blank" rel="noopener noreferrer" className="text-sm font-medium text-blue-300 hover:text-blue-200 hover:underline">
+                                                <a href={l.href} target="_blank" rel="noopener noreferrer" title={l.title} className="text-sm font-medium text-blue-300 hover:text-blue-200 hover:underline">
                                                     {l.label} ↗
                                                 </a>
                                                 {/* only surfaces below lg, where the tool doesn't work. */}

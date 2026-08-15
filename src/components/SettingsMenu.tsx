@@ -49,7 +49,8 @@ function SwatchRow({ label, value, swatches, onPick }: {
                             aria-pressed={active}
                             title={c}
                             style={{ backgroundColor: c }}
-                            className={`h-5 w-5 rounded-full border border-gray-300/60 ring-offset-2 ring-offset-white transition-transform hover:scale-110 dark:border-gray-600/60 dark:ring-offset-gray-950 ${
+                            // the border darkens on hover
+                            className={`h-5 w-5 rounded-full border border-gray-300/60 ring-offset-2 ring-offset-white transition-colors hover:border-gray-500 motion-ok:transition-all motion-ok:hover:scale-110 dark:border-gray-600/60 dark:ring-offset-gray-950 dark:hover:border-gray-300 ${
                                 active ? "ring-2 ring-gray-500 dark:ring-gray-300" : "ring-0"
                             }`}
                         />
@@ -139,7 +140,7 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
                 title="Settings"
                 className={`transition-colors hover:text-accent ${open ? "text-accent" : ""}`}
             >
-                <FaGear className={`transition-transform duration-300 ${open ? "rotate-45" : ""}`} />
+                <FaGear className={`motion-ok:transition-transform motion-ok:duration-300 ${open ? "rotate-45" : ""}`} />
             </button>
 
             {open && (
