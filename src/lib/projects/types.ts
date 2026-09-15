@@ -12,7 +12,7 @@ export type ProjectSection = {
     body: string;
     image?: string; // optional — triggers the split layout when present
     alt?: string;
-    focal?: string;   // e.g. "center", "top", "50% 30%"
+    focal?: string; // e.g. "center", "top", "50% 30%"
     size?: "XS" | "SM" | "MD" | "LG" | "XL";
     animated?: boolean;
 };

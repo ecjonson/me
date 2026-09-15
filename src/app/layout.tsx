@@ -1,4 +1,4 @@
-import { Analytics } from '@vercel/analytics/next';
+import { Analytics } from "@vercel/analytics/next";
 import type { Metadata, Viewport } from "next";
 import { DEFAULT_CUSTOM } from "@/lib/theme";
 import "./globals.css";
@@ -49,7 +49,8 @@ export const viewport: Viewport = {
 };
 
 const TITLE = "Evan Jonson";
-const DESCRIPTION = "Computer scientist, engineer, graphics researcher, and programmer.";
+const DESCRIPTION =
+    "Computer scientist, engineer, graphics researcher, and programmer.";
 
 export const metadata: Metadata = {
     title: {

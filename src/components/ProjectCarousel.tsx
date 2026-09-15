@@ -13,19 +13,37 @@ const ROLL_DURATION = 1000; // must match the animation-duration of .carousel-ro
 const ROLL_OFFSCREEN = 240;
 
 // timeline tick
-function YearMarker({ year, intro, delay }: { year: number; intro?: boolean; delay?: number }) {
+function YearMarker({
+    year,
+    intro,
+    delay,
+}: {
+    year: number;
+    intro?: boolean;
+    delay?: number;
+}) {
     return (
         <li
             className={`flex shrink-0 snap-start flex-col items-center gap-2 ${intro ? "carousel-roll-in" : ""}`}
             style={intro ? { animationDelay: `${delay}ms` } : undefined}
         >
             <div className="flex h-28 flex-col items-center justify-center gap-2">
-                <span aria-hidden="true" className="w-px flex-1 bg-gray-200 dark:bg-gray-800" />
-                <span className="text-xs font-medium tabular-nums text-gray-500 dark:text-gray-400">{year}</span>
-                <span aria-hidden="true" className="w-px flex-1 bg-gray-200 dark:bg-gray-800" />
+                <span
+                    aria-hidden="true"
+                    className="w-px flex-1 bg-gray-200 dark:bg-gray-800"
+                />
+                <span className="text-xs font-medium tabular-nums text-gray-500 dark:text-gray-400">
+                    {year}
+                </span>
+                <span
+                    aria-hidden="true"
+                    className="w-px flex-1 bg-gray-200 dark:bg-gray-800"
+                />
             </div>
             {/* keeps the marker the same total height as a project (thumbnail + name row) */}
-            <span aria-hidden="true" className="text-xs">&nbsp;</span>
+            <span aria-hidden="true" className="text-xs">
+                &nbsp;
+            </span>
         </li>
     );
 }
@@ -39,7 +57,9 @@ export function ProjectCarousel({ intro = false }: { intro?: boolean }) {
     // center thumbnail before paint so the reverse morph has a visible source
     useLayoutEffect(() => {
         let slug: string | null = null;
-        try { slug = sessionStorage.getItem("lastProject"); } catch {}
+        try {
+            slug = sessionStorage.getItem("lastProject");
+        } catch {}
         if (!slug) return;
         itemRefs.current.get(slug)?.scrollIntoView({
             inline: "center",
@@ -54,13 +74,18 @@ export function ProjectCarousel({ intro = false }: { intro?: boolean }) {
         if (!intro || !list) return;
         // reset to the resting position FIRST
         list.scrollLeft = 0;
-        try { sessionStorage.removeItem("lastProject"); } catch {}
-        if ( isReducedMotion() ) return;
+        try {
+            sessionStorage.removeItem("lastProject");
+        } catch {}
+        if (isReducedMotion()) return;
         const els = list.querySelectorAll<HTMLElement>(".carousel-roll-in");
         els.forEach((el) => {
             const home = el.offsetLeft - list.scrollLeft; // resting distance from the left edge
             // wait off-screen (ROLL_OFFSCREEN px left of the edge), then slide in
-            el.style.setProperty("--roll-from", `${-(home + ROLL_OFFSCREEN)}px`);
+            el.style.setProperty(
+                "--roll-from",
+                `${-(home + ROLL_OFFSCREEN)}px`,
+            );
         });
 
         list.style.scrollSnapType = "none";
@@ -82,49 +107,74 @@ export function ProjectCarousel({ intro = false }: { intro?: boolean }) {
 
     return (
         // overflow-x forces overflow-y to compute as auto, so the list clips its own children.
-        <ul ref={listRef} className="relative flex snap-x snap-mandatory gap-4 overflow-x-auto pt-4 pb-3 [scrollbar-width:thin]">
-            {projects.map(({ slug, name, year, blurb, image, alt, animated=false }, i) => {
-                // leading marker
-                const newYear = i === 0 || year !== projects[i - 1].year;
-                // oldest (highest index, rightmost) fires first.
-                const delay = ROLL_BASE + (last - i) * ROLL_STEP;
-                return (
-                    <Fragment key={slug}>
-                        {newYear && <YearMarker year={year} intro={intro} delay={delay + 40} />}
-                        <li
-                            ref={(el) => { if (el) itemRefs.current.set(slug, el); }}
-                            className={`shrink-0 snap-start ${intro ? "carousel-roll-in" : ""}`}
-                            style={intro ? { animationDelay: `${delay}ms` } : undefined}
-                        >
-                            <Link
-                                href={`/projects/${slug}`}
-                                title={blurb}
-                                onClick={() => markViewTransition("enter")}
-                                className="group flex flex-col items-center gap-2"
+        <ul
+            ref={listRef}
+            className="relative flex snap-x snap-mandatory gap-4 overflow-x-auto pt-4 pb-3 [scrollbar-width:thin]"
+        >
+            {projects.map(
+                (
+                    { slug, name, year, blurb, image, alt, animated = false },
+                    i,
+                ) => {
+                    // leading marker
+                    const newYear = i === 0 || year !== projects[i - 1].year;
+                    // oldest (highest index, rightmost) fires first.
+                    const delay = ROLL_BASE + (last - i) * ROLL_STEP;
+                    return (
+                        <Fragment key={slug}>
+                            {newYear && (
+                                <YearMarker
+                                    year={year}
+                                    intro={intro}
+                                    delay={delay + 40}
+                                />
+                            )}
+                            <li
+                                ref={(el) => {
+                                    if (el) itemRefs.current.set(slug, el);
+                                }}
+                                className={`shrink-0 snap-start ${intro ? "carousel-roll-in" : ""}`}
+                                style={
+                                    intro
+                                        ? { animationDelay: `${delay}ms` }
+                                        : undefined
+                                }
                             >
-                                {/* Shared element */}
-                                <ViewTransition name={`project-${slug}`} share="morph">
-                                    <span
-                                        data-morph-thumb
-                                        className="relative block h-28 w-40 overflow-hidden rounded-2xl transition-all duration-300 ease-out group-hover:shadow-[0_6px_20px_-6px_var(--accent)] group-focus-visible:shadow-[0_6px_20px_-6px_var(--accent)] motion-ok:group-hover:scale-105 motion-ok:group-focus-visible:scale-105 motion-ok:group-active:scale-105"
+                                <Link
+                                    href={`/projects/${slug}`}
+                                    title={blurb}
+                                    onClick={() => markViewTransition("enter")}
+                                    className="group flex flex-col items-center gap-2"
+                                >
+                                    {/* Shared element */}
+                                    <ViewTransition
+                                        name={`project-${slug}`}
+                                        share="morph"
                                     >
-                                        <Image
-                                            src={image}
-                                            alt={alt}
-                                            fill
-                                            unoptimized={animated}
-                                            priority={i === 0}
-                                            sizes="160px"
-                                            className="object-cover transition-transform duration-300 ease-out motion-ok:group-hover:scale-110 motion-ok:group-active:scale-110"
-                                        />
+                                        <span
+                                            data-morph-thumb
+                                            className="relative block h-28 w-40 overflow-hidden rounded-2xl transition-all duration-300 ease-out group-hover:shadow-[0_6px_20px_-6px_var(--accent)] group-focus-visible:shadow-[0_6px_20px_-6px_var(--accent)] motion-ok:group-hover:scale-105 motion-ok:group-focus-visible:scale-105 motion-ok:group-active:scale-105"
+                                        >
+                                            <Image
+                                                src={image}
+                                                alt={alt}
+                                                fill
+                                                unoptimized={animated}
+                                                priority={i === 0}
+                                                sizes="160px"
+                                                className="object-cover transition-transform duration-300 ease-out motion-ok:group-hover:scale-110 motion-ok:group-active:scale-110"
+                                            />
+                                        </span>
+                                    </ViewTransition>
+                                    <span className="w-40 text-center text-xs text-gray-600 dark:text-gray-400">
+                                        {name}
                                     </span>
-                                </ViewTransition>
-                                <span className="w-40 text-center text-xs text-gray-600 dark:text-gray-400">{name}</span>
-                            </Link>
-                        </li>
-                    </Fragment>
-                );
-            })}
+                                </Link>
+                            </li>
+                        </Fragment>
+                    );
+                },
+            )}
         </ul>
     );
 }

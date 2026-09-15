@@ -4,7 +4,8 @@ export default function manifest(): MetadataRoute.Manifest {
     return {
         name: "Evan Jonson",
         short_name: "Evan Jonson",
-        description: "Computer scientist, engineer, graphics researcher, and programmer.",
+        description:
+            "Computer scientist, engineer, graphics researcher, and programmer.",
         id: "/",
         start_url: "/",
         scope: "/",
