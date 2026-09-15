@@ -13,7 +13,7 @@ jobs:
     steps:
       - name: Fetch Dependabot metadata
         id: meta
-        uses: dependabot/fetch-metadata@v2
+        uses: dependabot/fetch-metadata@v3
 
       - name: Enable auto-merge
         if: contains(fromJSON('["dev-minor-patch","prod-patch","actions"]'), steps.meta.outputs.dependency-group)
