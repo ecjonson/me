@@ -10,16 +10,25 @@ const RANDOM_VARIANTS: Variant[] = ["grid", "dots", "lines", "glow"];
 // cheap deterministic hash
 function hash(s: string) {
     let h = 0;
-    for (let i = 0; i < s.length; i++) h = (Math.imul(h, 31) + s.charCodeAt(i)) | 0;
+    for (let i = 0; i < s.length; i++)
+        h = (Math.imul(h, 31) + s.charCodeAt(i)) | 0;
     return Math.abs(h);
 }
 
 // center-weighted fade so patterns look intentional
-const MASK = "radial-gradient(ellipse 85% 75% at 50% 40%, #000 30%, transparent 82%)";
-const mix = (pct: number) => `color-mix(in srgb, var(--accent) ${pct}%, transparent)`;
+const MASK =
+    "radial-gradient(ellipse 85% 75% at 50% 40%, #000 30%, transparent 82%)";
+const mix = (pct: number) =>
+    `color-mix(in srgb, var(--accent) ${pct}%, transparent)`;
 
 // a faint, accent-tinted layer behind the page
-export function ProjectBackdrop({ seed, variant }: { seed: string; variant?: Variant }) {
+export function ProjectBackdrop({
+    seed,
+    variant,
+}: {
+    seed: string;
+    variant?: Variant;
+}) {
     const { resolved, spots } = useMemo(() => {
         const h = hash(seed);
         return {

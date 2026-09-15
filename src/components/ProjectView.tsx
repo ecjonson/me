@@ -27,7 +27,13 @@ const IMAGE_BASIS_LG: Record<SectionSize, string> = {
     XL: "", // handled separately (image goes full-bleed)
 };
 
-function SectionBlock({ section: s, index }: { section: ProjectSection; index: number }) {
+function SectionBlock({
+    section: s,
+    index,
+}: {
+    section: ProjectSection;
+    index: number;
+}) {
     // alternates the stack/split order: even = image first, odd = text first
     const reverse = index % 2 === 1;
     const hasImage = !!s.image;
@@ -51,9 +57,14 @@ function SectionBlock({ section: s, index }: { section: ProjectSection; index: n
     if (!hasImage) {
         return (
             // overlong copy grows the section instead of being clipped
-            <section id={s.id} className={`flex min-h-dvh snap-start ${SECTION_FRAME}`}>
+            <section
+                id={s.id}
+                className={`flex min-h-dvh snap-start ${SECTION_FRAME}`}
+            >
                 {/* my-auto centres when it fits, without the top-clipping that items-center causes */}
-                <div className={`my-auto w-full min-w-0 max-w-2xl px-2 sm:px-6 ${reverse ? "lg:ml-auto lg:text-right" : ""}`}>
+                <div
+                    className={`my-auto w-full min-w-0 max-w-2xl px-2 sm:px-6 ${reverse ? "lg:ml-auto lg:text-right" : ""}`}
+                >
                     {text}
                 </div>
             </section>
@@ -61,10 +72,15 @@ function SectionBlock({ section: s, index }: { section: ProjectSection; index: n
     }
 
     return (
-        <section id={s.id} className={`relative flex min-h-dvh snap-start flex-col ${SECTION_FRAME}`}>
+        <section
+            id={s.id}
+            className={`relative flex min-h-dvh snap-start flex-col ${SECTION_FRAME}`}
+        >
             {/* mobile: stacked split (order alternating), unaffected by size.
                 desktop: image width follows `size`; XL fills and the copy overlays. */}
-            <div className={`relative flex w-full flex-1 gap-4 lg:gap-6 ${reverse ? "flex-col-reverse lg:flex-row-reverse" : "flex-col lg:flex-row"}`}>
+            <div
+                className={`relative flex w-full flex-1 gap-4 lg:gap-6 ${reverse ? "flex-col-reverse lg:flex-row-reverse" : "flex-col lg:flex-row"}`}
+            >
                 {/* image: fixed-height band on mobile; sized column (or full-bleed for XL) on desktop */}
                 <div
                     className={`relative w-full shrink-0 overflow-hidden rounded-2xl ${IMAGE_BAND} ${
@@ -81,10 +97,14 @@ function SectionBlock({ section: s, index }: { section: ProjectSection; index: n
                         style={{ objectPosition: s.focal ?? "center" }}
                     />
                     {/* readability scrim — only when the copy overlays (XL, desktop). */}
-                    {isXL && <div className="absolute inset-0 hidden bg-linear-to-r from-black/70 via-black/20 to-transparent lg:block" />}
+                    {isXL && (
+                        <div className="absolute inset-0 hidden bg-linear-to-r from-black/70 via-black/20 to-transparent lg:block" />
+                    )}
                 </div>
                 {/* text */}
-                <div className={`flex min-w-0 flex-1 items-center px-4 sm:px-6 lg:px-12 ${isXL ? "lg:relative lg:z-10 lg:max-w-2xl" : ""}`}>
+                <div
+                    className={`flex min-w-0 flex-1 items-center px-4 sm:px-6 lg:px-12 ${isXL ? "lg:relative lg:z-10 lg:max-w-2xl" : ""}`}
+                >
                     <div className="w-full max-w-xl">{text}</div>
                 </div>
             </div>
@@ -129,7 +149,10 @@ export function ProjectView({ project }: { project: Project }) {
         const io = new IntersectionObserver(
             (entries) => {
                 for (const e of entries) {
-                    seen.set(e.target.id, e.isIntersecting ? e.intersectionRatio : 0);
+                    seen.set(
+                        e.target.id,
+                        e.isIntersecting ? e.intersectionRatio : 0,
+                    );
                 }
                 let bestId: string | null = null;
                 let best = 0;
@@ -141,7 +164,7 @@ export function ProjectView({ project }: { project: Project }) {
                 }
                 if (bestId) setActive(bestId);
             },
-            { root, threshold: [0, 0.2, 0.4, 0.6, 0.8, 1] }
+            { root, threshold: [0, 0.2, 0.4, 0.6, 0.8, 1] },
         );
         targets.forEach((t) => io.observe(t));
         return () => io.disconnect();
@@ -177,11 +200,17 @@ export function ProjectView({ project }: { project: Project }) {
 
         const onWheel = (e: WheelEvent) => {
             // Vertical rail uses deltaY; horizontal mobile strip uses deltaX.
-            const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+            const delta =
+                Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
             if (delta === 0) return;
             e.preventDefault(); // relay to the scroller instead of scrolling the page
             // Normalise line/page deltas to pixels so the feel matches the trackpad.
-            const unit = e.deltaMode === 1 ? 16 : e.deltaMode === 2 ? root.clientHeight : 1;
+            const unit =
+                e.deltaMode === 1
+                    ? 16
+                    : e.deltaMode === 2
+                      ? root.clientHeight
+                      : 1;
             // behavior:"auto" overrides the scroller's scroll-smooth so momentum stays 1:1.
             root.scrollBy({ top: delta * unit, behavior: "auto" });
         };
@@ -214,14 +243,15 @@ export function ProjectView({ project }: { project: Project }) {
             nav.removeEventListener("touchstart", onTouchStart);
             nav.removeEventListener("touchmove", onTouchMove);
         };
-
     }, [project.slug]);
 
     // Esc exits to the index, the way a modal closes
     const router = useRouter();
 
     // warm "/" as soon as a project opens
-    useEffect(() => { router.prefetch("/"); }, [router]);
+    useEffect(() => {
+        router.prefetch("/");
+    }, [router]);
 
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
@@ -244,7 +274,9 @@ export function ProjectView({ project }: { project: Project }) {
 
     // remember the current project
     useEffect(() => {
-        try { sessionStorage.setItem("lastProject", project.slug); } catch {}
+        try {
+            sessionStorage.setItem("lastProject", project.slug);
+        } catch {}
     }, [project.slug]);
 
     // mobile: horizontal swipe swaps projects like flipping between app screens
@@ -255,11 +287,17 @@ export function ProjectView({ project }: { project: Project }) {
 
         const SWIPE_MIN = 60; // px of horizontal travel to commit
         const AXIS_LOCK = 12; // px before locking to an axis
-        let startX = 0, startY = 0, dx = 0, dy = 0;
+        let startX = 0,
+            startY = 0,
+            dx = 0,
+            dy = 0;
         let axis: "none" | "x" | "y" = "none";
 
         const onStart = (e: TouchEvent) => {
-            if (e.touches.length !== 1) { axis = "y"; return; } // pinch/multi → ignore
+            if (e.touches.length !== 1) {
+                axis = "y";
+                return;
+            } // pinch/multi → ignore
             startX = e.touches[0].clientX;
             startY = e.touches[0].clientY;
             dx = dy = 0;
@@ -269,7 +307,10 @@ export function ProjectView({ project }: { project: Project }) {
             if (axis === "y") return;
             dx = e.touches[0].clientX - startX;
             dy = e.touches[0].clientY - startY;
-            if (axis === "none" && (Math.abs(dx) > AXIS_LOCK || Math.abs(dy) > AXIS_LOCK)) {
+            if (
+                axis === "none" &&
+                (Math.abs(dx) > AXIS_LOCK || Math.abs(dy) > AXIS_LOCK)
+            ) {
                 axis = Math.abs(dx) > Math.abs(dy) ? "x" : "y";
             }
             if (axis === "x") e.preventDefault(); // suppress edge-back / rubber-band
@@ -326,7 +367,12 @@ export function ProjectView({ project }: { project: Project }) {
                         prefetch
                         className="absolute left-4 top-4 hidden h-9 items-center gap-1.5 rounded-full bg-gray-100/90 pl-2.5 pr-3.5 text-sm font-medium leading-none text-gray-600 backdrop-blur-sm transition-colors hover:text-accent lg:inline-flex dark:bg-gray-800/90 dark:text-gray-300"
                     >
-                        <span aria-hidden="true" className="text-lg leading-none">←</span>
+                        <span
+                            aria-hidden="true"
+                            className="text-lg leading-none"
+                        >
+                            ←
+                        </span>
                         Back
                     </Link>
 
@@ -340,9 +386,14 @@ export function ProjectView({ project }: { project: Project }) {
                                 className="hidden shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-(--accent-soft) lg:flex lg:w-full"
                             >
                                 <span aria-hidden="true">←</span>
-                                <span className="max-w-32 truncate lg:max-w-full">{prevProject.name}</span>
+                                <span className="max-w-32 truncate lg:max-w-full">
+                                    {prevProject.name}
+                                </span>
                             </Link>
-                            <span aria-hidden="true" className="hidden bg-gray-200 lg:my-1 lg:block lg:h-px lg:w-full dark:bg-gray-800" />
+                            <span
+                                aria-hidden="true"
+                                className="hidden bg-gray-200 lg:my-1 lg:block lg:h-px lg:w-full dark:bg-gray-800"
+                            />
                         </>
                     ) : null}
 
@@ -374,7 +425,9 @@ export function ProjectView({ project }: { project: Project }) {
                         <div
                             style={{ transform: `translateX(${navOffset}px)` }}
                             className={`absolute left-0 top-0 flex h-full items-center gap-2 will-change-transform lg:contents ${
-                                navReady ? "motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-out" : ""
+                                navReady
+                                    ? "motion-safe:transition-transform motion-safe:duration-500 motion-safe:ease-out"
+                                    : ""
                             }`}
                         >
                             {items.map((item, idx) => {
@@ -386,7 +439,9 @@ export function ProjectView({ project }: { project: Project }) {
                                             itemRefs.current[idx] = el;
                                         }}
                                         href={`#${item.id}`}
-                                        aria-current={isActive ? "true" : undefined}
+                                        aria-current={
+                                            isActive ? "true" : undefined
+                                        }
                                         title={item.label}
                                         className={`max-w-36 shrink-0 truncate rounded-full px-3 py-1.5 text-xs transition-colors lg:max-w-full ${
                                             isActive
@@ -412,7 +467,9 @@ export function ProjectView({ project }: { project: Project }) {
                                         title={`Next project: ${nextProject.name}`}
                                         className="flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium text-accent transition-colors hover:bg-(--accent-soft) lg:w-full"
                                     >
-                                        <span className="max-w-32 truncate lg:max-w-full">{nextProject.name}</span>
+                                        <span className="max-w-32 truncate lg:max-w-full">
+                                            {nextProject.name}
+                                        </span>
                                         <span aria-hidden="true">→</span>
                                     </Link>
                                 </>
@@ -428,9 +485,15 @@ export function ProjectView({ project }: { project: Project }) {
                     className="vt-page-body h-dvh snap-y snap-mandatory overflow-y-scroll motion-safe:scroll-smooth"
                 >
                     {/* hero — fullscreen framed image */}
-                    <section id="hero" className={`relative flex min-h-dvh snap-start flex-col ${SECTION_FRAME}`}>
+                    <section
+                        id="hero"
+                        className={`relative flex min-h-dvh snap-start flex-col ${SECTION_FRAME}`}
+                    >
                         <div className="relative w-full flex-1">
-                            <ViewTransition name={`project-${project.slug}`} share="morph">
+                            <ViewTransition
+                                name={`project-${project.slug}`}
+                                share="morph"
+                            >
                                 <div className="absolute inset-0 overflow-hidden rounded-2xl">
                                     <Image
                                         src={project.image}
@@ -440,7 +503,10 @@ export function ProjectView({ project }: { project: Project }) {
                                         priority
                                         sizes="100vw"
                                         className="object-cover"
-                                        style={{ objectPosition: project.focal ?? "center" }}
+                                        style={{
+                                            objectPosition:
+                                                project.focal ?? "center",
+                                        }}
                                     />
                                     <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/10 to-transparent" />
                                 </div>
@@ -451,12 +517,23 @@ export function ProjectView({ project }: { project: Project }) {
                                 <h1 className="text-[clamp(1.75rem,8vw,2.25rem)] font-bold tracking-tight text-balance text-white sm:text-6xl">
                                     {project.name}
                                 </h1>
-                                <p className="mt-3 max-w-2xl text-base text-pretty text-gray-200 sm:text-lg">{project.blurb}</p>
+                                <p className="mt-3 max-w-2xl text-base text-pretty text-gray-200 sm:text-lg">
+                                    {project.blurb}
+                                </p>
                                 {project.links?.length ? (
                                     <div className="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-2 sm:mt-5">
                                         {project.links.map((l: ProjectLink) => (
-                                            <span key={l.href} className="inline-flex items-baseline gap-1.5">
-                                                <a href={l.href} target="_blank" rel="noopener noreferrer" title={l.title} className="text-sm font-medium text-blue-300 hover:text-blue-200 hover:underline">
+                                            <span
+                                                key={l.href}
+                                                className="inline-flex items-baseline gap-1.5"
+                                            >
+                                                <a
+                                                    href={l.href}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    title={l.title}
+                                                    className="text-sm font-medium text-blue-300 hover:text-blue-200 hover:underline"
+                                                >
                                                     {l.label} ↗
                                                 </a>
                                                 {/* only surfaces below lg, where the tool doesn't work. */}

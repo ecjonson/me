@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { FaGear, FaRotateLeft, FaCircleHalfStroke, FaPlay, FaPause, FaSun, FaMoon, FaPalette } from "react-icons/fa6";
+import {
+    FaGear,
+    FaRotateLeft,
+    FaCircleHalfStroke,
+    FaPlay,
+    FaPause,
+    FaSun,
+    FaMoon,
+    FaPalette,
+} from "react-icons/fa6";
 import {
     applyTheme,
     getCustomColors,
@@ -13,22 +22,56 @@ import {
     type CustomColors,
     type Theme,
 } from "@/lib/theme";
-import { applyMotion, getMotionPref, systemPrefersReduced, type MotionPref } from "@/lib/motion";
+import {
+    applyMotion,
+    getMotionPref,
+    systemPrefersReduced,
+    type MotionPref,
+} from "@/lib/motion";
 
-const NEXT_THEME: Record<Theme, Theme> = { light: "dark", dark: "system", system: "custom", custom: "light" };
-const THEME_ICON = { light: FaSun, dark: FaMoon, system: FaCircleHalfStroke, custom: FaPalette };
-const THEME_LABEL = { light: "Light", dark: "Dark", system: "System", custom: "Custom" };
+const NEXT_THEME: Record<Theme, Theme> = {
+    light: "dark",
+    dark: "system",
+    system: "custom",
+    custom: "light",
+};
+const THEME_ICON = {
+    light: FaSun,
+    dark: FaMoon,
+    system: FaCircleHalfStroke,
+    custom: FaPalette,
+};
+const THEME_LABEL = {
+    light: "Light",
+    dark: "Dark",
+    system: "System",
+    custom: "Custom",
+};
 
-const NEXT_MOTION: Record<MotionPref, MotionPref> = { full: "reduced", reduced: "system", system: "full" };
-const MOTION_ICON = { full: FaPlay, reduced: FaPause, system: FaCircleHalfStroke };
+const NEXT_MOTION: Record<MotionPref, MotionPref> = {
+    full: "reduced",
+    reduced: "system",
+    system: "full",
+};
+const MOTION_ICON = {
+    full: FaPlay,
+    reduced: FaPause,
+    system: FaCircleHalfStroke,
+};
 const MOTION_LABEL = { full: "Full", reduced: "Reduced", system: "System" };
 
 const rowCls = "flex w-full items-center justify-between gap-6 text-sm";
 const rowLabel = "text-gray-600 dark:text-gray-400";
-const controlCls = "inline-flex items-center gap-2 transition-colors hover:text-accent";
+const controlCls =
+    "inline-flex items-center gap-2 transition-colors hover:text-accent";
 
 // custom-colour row
-function SwatchRow({ label, value, swatches, onPick }: {
+function SwatchRow({
+    label,
+    value,
+    swatches,
+    onPick,
+}: {
     label: string;
     value: string;
     swatches: string[];
@@ -51,7 +94,9 @@ function SwatchRow({ label, value, swatches, onPick }: {
                             style={{ backgroundColor: c }}
                             // the border darkens on hover
                             className={`h-5 w-5 rounded-full border border-gray-300/60 ring-offset-2 ring-offset-white transition-colors hover:border-gray-500 motion-ok:transition-all motion-ok:hover:scale-110 dark:border-gray-600/60 dark:ring-offset-gray-950 dark:hover:border-gray-300 ${
-                                active ? "ring-2 ring-gray-500 dark:ring-gray-300" : "ring-0"
+                                active
+                                    ? "ring-2 ring-gray-500 dark:ring-gray-300"
+                                    : "ring-0"
                             }`}
                         />
                     );
@@ -65,9 +110,15 @@ function SwatchRow({ label, value, swatches, onPick }: {
 export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
     const [open, setOpen] = useState(false);
     const [theme, setThemeState] = useState<Theme>(() => getTheme());
-    const [custom, setCustomState] = useState<CustomColors>(() => getCustomColors());
-    const [motion, setMotionState] = useState<MotionPref>(() => getMotionPref());
-    const [systemReduced, setSystemReduced] = useState(() => systemPrefersReduced());
+    const [custom, setCustomState] = useState<CustomColors>(() =>
+        getCustomColors(),
+    );
+    const [motion, setMotionState] = useState<MotionPref>(() =>
+        getMotionPref(),
+    );
+    const [systemReduced, setSystemReduced] = useState(() =>
+        systemPrefersReduced(),
+    );
     const ref = useRef<HTMLDivElement>(null);
 
     // re-apply theme if the OS scheme flips while on "System"
@@ -94,7 +145,8 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
     useEffect(() => {
         if (!open) return;
         const onPointer = (e: PointerEvent) => {
-            if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+            if (ref.current && !ref.current.contains(e.target as Node))
+                setOpen(false);
         };
         const onKey = (e: KeyboardEvent) => {
             if (e.key === "Escape") setOpen(false);
@@ -140,7 +192,9 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
                 title="Settings"
                 className={`transition-colors hover:text-accent ${open ? "text-accent" : ""}`}
             >
-                <FaGear className={`motion-ok:transition-transform motion-ok:duration-300 ${open ? "rotate-45" : ""}`} />
+                <FaGear
+                    className={`motion-ok:transition-transform motion-ok:duration-300 ${open ? "rotate-45" : ""}`}
+                />
             </button>
 
             {open && (
@@ -161,7 +215,9 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
                                 title={`Theme: ${THEME_LABEL[theme]}`}
                                 className={controlCls}
                             >
-                                <span className="text-xs">{THEME_LABEL[theme]}</span>
+                                <span className="text-xs">
+                                    {THEME_LABEL[theme]}
+                                </span>
                                 <ThemeIcon />
                             </button>
                         </div>
@@ -169,8 +225,18 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
                         {/* custom colours*/}
                         {isCustom && (
                             <div className="flex flex-col gap-3 rounded-xl bg-gray-500/5 p-3 dark:bg-white/5">
-                                <SwatchRow label="Primary" value={custom.primary} swatches={PRIMARY_SWATCHES} onPick={(c) => pickColor({ primary: c })} />
-                                <SwatchRow label="Accent" value={custom.accent} swatches={ACCENT_SWATCHES} onPick={(c) => pickColor({ accent: c })} />
+                                <SwatchRow
+                                    label="Primary"
+                                    value={custom.primary}
+                                    swatches={PRIMARY_SWATCHES}
+                                    onPick={(c) => pickColor({ primary: c })}
+                                />
+                                <SwatchRow
+                                    label="Accent"
+                                    value={custom.accent}
+                                    swatches={ACCENT_SWATCHES}
+                                    onPick={(c) => pickColor({ accent: c })}
+                                />
                             </div>
                         )}
 
@@ -184,7 +250,9 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
                                 title={`Motion: ${MOTION_LABEL[motion]}`}
                                 className={controlCls}
                             >
-                                <span className="text-xs">{MOTION_LABEL[motion]}</span>
+                                <span className="text-xs">
+                                    {MOTION_LABEL[motion]}
+                                </span>
                                 <MotionIcon />
                             </button>
                         </div>
@@ -199,7 +267,11 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
                                 setOpen(false);
                                 onReplay();
                             }}
-                            title={reduced ? "Turn motion on to replay the intro" : "Replay intro"}
+                            title={
+                                reduced
+                                    ? "Turn motion on to replay the intro"
+                                    : "Replay intro"
+                            }
                             className={`${rowCls} ${reduced ? "opacity-50 disabled:cursor-not-allowed" : controlCls}`}
                         >
                             <span className={rowLabel}>Replay intro</span>
@@ -207,7 +279,9 @@ export function SettingsMenu({ onReplay }: { onReplay: () => void }) {
                         </button>
                         {reduced && (
                             <p className="-mt-2 text-xs text-gray-500 dark:text-gray-500">
-                                { systemReducedBySetting ? "Reduced motion system setting detected — override to replay intro." : "The intro is animated — turn motion on to replay it." }
+                                {systemReducedBySetting
+                                    ? "Reduced motion system setting detected — override to replay intro."
+                                    : "The intro is animated — turn motion on to replay it."}
                             </p>
                         )}
                     </div>

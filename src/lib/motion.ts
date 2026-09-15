@@ -24,7 +24,10 @@ export function isReducedMotion(pref: MotionPref = getMotionPref()): boolean {
 // reflect the effective state on <html> for CSS to hook into
 export function applyMotion(pref: MotionPref = getMotionPref()): void {
     if (typeof document === "undefined") return;
-    document.documentElement.classList.toggle("reduce-motion", isReducedMotion(pref));
+    document.documentElement.classList.toggle(
+        "reduce-motion",
+        isReducedMotion(pref),
+    );
 }
 
 // view-transition direction
