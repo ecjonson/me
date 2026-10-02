@@ -15,8 +15,10 @@ jobs:
         id: meta
         uses: dependabot/fetch-metadata@v3
 
-      - name: Enable auto-merge
-        if: contains(fromJSON('["dev-minor-patch","prod-patch","actions"]'), steps.meta.outputs.dependency-group)
+      - name: Enable auto-merge for patch and minor updates
+        if: >-
+          steps.meta.outputs.update-type == 'version-update:semver-patch' ||
+          steps.meta.outputs.update-type == 'version-update:semver-minor'
         run: gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}
