@@ -14,12 +14,8 @@ Welcome! This is the source for [evanjonson.com](https://www.evanjonson.com/). I
 
 Get in touch: [evancjonson@gmail.com](mailto:evancjonson@gmail.com)
 
-## Reporting a Problem
-
-[**Open an issue**](https://github.com/PixelsRN/pixelsrn.com/issues/new/choose) and
-pick a template:
-
-- **Bug report**: something is broken, looks wrong, or behaves oddly.
-- **Content change**: a wording, link, name, or publication update.
+## Reporting a Vulnerability
 
 For security issues, please don't open a public issue. See [SECURITY.md](SECURITY.md).
+
+[**Report a vulnerability**](https://github.com/PixelsRN/pixelsrn.com/issues/new/choose) privately.
