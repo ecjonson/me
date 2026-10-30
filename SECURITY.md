@@ -9,7 +9,7 @@ forks are out of scope.
 
 Please don't open a public issue for security problems.
 
-[Report a vulnerability privately](https://github.com/PixelsRN/pixelsrn.com/security/advisories/new) through GitHub instead: go to the **Security** tab of this
+[Report a vulnerability privately](https://github.com/ecjonson/me/security/advisories/new) through GitHub instead: go to the **Security** tab of this
 repo and click **Report a vulnerability**. Only I can see the report. Include what you found, the page or endpoint involved, and steps to reproduce
 it if you can.
 

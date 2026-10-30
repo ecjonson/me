@@ -18,4 +18,4 @@ Get in touch: [evancjonson@gmail.com](mailto:evancjonson@gmail.com)
 
 For security issues, please don't open a public issue. See [SECURITY.md](SECURITY.md).
 
-[**Report a vulnerability**](https://github.com/PixelsRN/pixelsrn.com/issues/new/choose) privately.
+[**Report a vulnerability**](https://github.com/ecjonson/me/security/advisories/new) privately.
