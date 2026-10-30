@@ -12,10 +12,10 @@
 
 Welcome! This is the source for [evanjonson.com](https://www.evanjonson.com/). It's built with NextJs, served by Vercel, and published for transparency.
 
-Get in touch: [evancjonson@gmail.com](mailto:evancjonson@gmail.com)
+Get in touch: [**evancjonson@gmail.com**](mailto:evancjonson@gmail.com)
 
 ## Reporting a Vulnerability
 
 For security issues, please don't open a public issue. See [SECURITY.md](SECURITY.md).
 
-[**Report a vulnerability**](https://github.com/ecjonson/me/security/advisories/new) privately.
+[Report a vulnerability](https://github.com/ecjonson/me/security/advisories/new) privately.
