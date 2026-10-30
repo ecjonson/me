@@ -1,0 +1,24 @@
+Content License
+
+Copyright (c) 2026 Evan Jonson. All rights reserved.
+
+The MIT License in LICENSE applies only to the source code of this site.
+It does not apply to the site's content, which includes:
+
+- Written content, such as the bio, project descriptions, case studies,
+  and other copy, wherever it appears in the repository (including text
+  inside source files)
+- Images, photos, screenshots, videos, logos, and other media, such as
+  the files in public/
+- My name, likeness, and personal branding
+
+You may not copy, reuse, or republish this content without written
+permission. You're welcome to link to the site or to individual pages.
+
+Work shown in the portfolio that was created for clients or employers,
+including their names, logos, and screenshots of their products, remains
+the property of its respective owners and is not licensed to you under
+either license.
+
+If you fork this repository to build your own site, please replace all
+content with your own.

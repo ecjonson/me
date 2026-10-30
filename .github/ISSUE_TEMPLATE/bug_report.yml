@@ -1,0 +1,72 @@
+name: Bug report
+description: Something on the site is broken, looks wrong, or behaves oddly.
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report this. For security issues, please
+        use the **Report a vulnerability** button on the Security tab instead.
+
+  - type: input
+    id: page
+    attributes:
+      label: Page
+      description: The URL where it happened.
+      placeholder: https://example.com/projects
+    validations:
+      required: true
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: What you saw, and what you expected to see instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: If it only happens sometimes, say so.
+      placeholder: |
+        1. Open the home page
+        2. Click "Work" during the greeting animation
+        3. ...
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: Device
+      options:
+        - Desktop
+        - Phone
+        - Tablet
+    validations:
+      required: true
+
+  - type: input
+    id: browser
+    attributes:
+      label: Browser and OS
+      placeholder: Safari 18 on iOS 18
+    validations:
+      required: true
+
+  - type: dropdown
+    id: reduced-motion
+    attributes:
+      label: Is "reduce motion" turned on in your system settings?
+      description: Helps narrow down animation and page transition issues.
+      options:
+        - "No"
+        - "Yes"
+        - Not sure
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or recording
+      description: Drag files in here. A screen recording is ideal for animation bugs.
